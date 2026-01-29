@@ -103,7 +103,7 @@ extern "C" {
 /**
  * A macro that defines if the API succeeded
  *
- * @author	Benjamin "Nefarius" Höglinger-Stelzer
+ * @author	Benjamin "Nefarius" Hï¿½glinger-Stelzer
  * @date	01.09.2020
  *
  * @param 	_val_	The error value.
@@ -158,7 +158,7 @@ extern "C" {
     /**
      *  Allocates an object representing a driver connection
      *
-     * @author	Benjamin "Nefarius" Höglinger-Stelzer
+     * @author	Benjamin "Nefarius" Hï¿½glinger-Stelzer
      * @date	28.08.2017
      *
      * @returns	A PVIGEM_CLIENT object.
@@ -168,7 +168,7 @@ extern "C" {
     /**
      * Frees up memory used by the driver connection object
      *
-     * @author	Benjamin "Nefarius" Höglinger-Stelzer
+     * @author	Benjamin "Nefarius" Hï¿½glinger-Stelzer
      * @date	28.08.2017
      *
      * @param 	vigem	The PVIGEM_CLIENT object.
@@ -181,7 +181,7 @@ extern "C" {
      * Initializes the driver object and establishes a connection to the emulation bus
      *          driver. Returns an error if no compatible bus device has been found.
      *
-     * @author	Benjamin "Nefarius" Höglinger-Stelzer
+     * @author	Benjamin "Nefarius" Hï¿½glinger-Stelzer
      * @date	28.08.2017
      *
      * @param 	vigem	The PVIGEM_CLIENT object.
@@ -198,7 +198,7 @@ extern "C" {
      *           still be connected will be destroyed automatically. Be aware, that allocated target
      *           objects won't be automatically freed, this has to be taken care of by the caller.
      *
-     * @author	Benjamin "Nefarius" Höglinger-Stelzer
+     * @author	Benjamin "Nefarius" Hï¿½glinger-Stelzer
      * @date	28.08.2017
      *
      * @param 	vigem	The PVIGEM_CLIENT object.
@@ -226,7 +226,7 @@ extern "C" {
     /**
      * Allocates an object representing an Xbox 360 Controller device.
      *
-     * @author	Benjamin "Nefarius" Höglinger-Stelzer
+     * @author	Benjamin "Nefarius" Hï¿½glinger-Stelzer
      * @date	28.08.2017
      *
      * @returns	A PVIGEM_TARGET representing an Xbox 360 Controller device.
@@ -236,12 +236,22 @@ extern "C" {
     /**
      * Allocates an object representing a DualShock 4 Controller device.
      *
-     * @author	Benjamin "Nefarius" Höglinger-Stelzer
+     * @author	Benjamin "Nefarius" Hï¿½glinger-Stelzer
      * @date	28.08.2017
      *
      * @returns	A PVIGEM_TARGET representing a DualShock 4 Controller device.
      */
     VIGEM_API PVIGEM_TARGET vigem_target_ds4_alloc(void);
+    
+    /**
+     * Allocates an object representing a DualSense 5 Controller device.
+     *
+     * @author	awalol
+     * @date	28.01.2026
+     *
+     * @returns	A PVIGEM_TARGET representing a DualSense 5 Controller device.
+     */
+    VIGEM_API PVIGEM_TARGET vigem_target_ds5_alloc(void);
 
     /**
      * Frees up memory used by the target device object. This does not automatically remove
@@ -249,7 +259,7 @@ extern "C" {
      *          removed before this call, the device becomes orphaned until the owning process is
      *          terminated.
      *
-     * @author	Benjamin "Nefarius" Höglinger-Stelzer
+     * @author	Benjamin "Nefarius" Hï¿½glinger-Stelzer
      * @date	28.08.2017
      *
      * @param 	target	The target device object.
@@ -263,7 +273,7 @@ extern "C" {
      *          event of a physical hardware device. This function blocks until the target device is
      *          in full operational mode.
      *
-     * @author	Benjamin "Nefarius" Höglinger-Stelzer
+     * @author	Benjamin "Nefarius" Hï¿½glinger-Stelzer
      * @date	28.08.2017
      *
      * @param 	vigem 	The driver connection object.
@@ -282,7 +292,7 @@ extern "C" {
      *          callback may be registered which gets called on error or if the target device has
      *          become fully operational.
      *
-     * @author	Benjamin "Nefarius" Höglinger-Stelzer
+     * @author	Benjamin "Nefarius" Hï¿½glinger-Stelzer
      * @date	28.08.2017
      *
      * @param 	vigem 	The driver connection object.
@@ -303,7 +313,7 @@ extern "C" {
      *           after this function is called. If this function is never called on target device
      *           objects, they will be removed from the bus when the owning process terminates.
      *
-     * @author	Benjamin "Nefarius" Höglinger
+     * @author	Benjamin "Nefarius" Hï¿½glinger
      * @date	28.08.2017
      *
      * @param 	vigem 	The driver connection object.
@@ -321,7 +331,7 @@ extern "C" {
      *                 occur on the provided target device. This function fails if the provided
      *                 target device isn't fully operational or in an erroneous state.
      *
-     * @author	Benjamin "Nefarius" Höglinger
+     * @author	Benjamin "Nefarius" Hï¿½glinger
      * @date	28.08.2017
      *
      * @param 	vigem			The driver connection object.
@@ -343,7 +353,7 @@ extern "C" {
      *                 occur on the provided target device. This function fails if the provided
      *                 target device isn't fully operational or in an erroneous state.
      *
-     * @author	Benjamin "Nefarius" Höglinger
+     * @author	Benjamin "Nefarius" Hï¿½glinger
      * @date	28.08.2017
      *
      * @param 	vigem			The driver connection object.
@@ -363,7 +373,7 @@ extern "C" {
     /**
      * Removes a previously registered callback function from the provided target object.
      *
-     * @author	Benjamin "Nefarius" Höglinger
+     * @author	Benjamin "Nefarius" Hï¿½glinger
      * @date	28.08.2017
      *
      * @param 	target	The target device object.
@@ -375,7 +385,7 @@ extern "C" {
     /**
      * Removes a previously registered callback function from the provided target object.
      *
-     * @author	Benjamin "Nefarius" Höglinger
+     * @author	Benjamin "Nefarius" Hï¿½glinger
      * @date	28.08.2017
      *
      * @param 	target	The target device object.
@@ -387,7 +397,7 @@ extern "C" {
     /**
      * Overrides the default Vendor ID value with the provided one.
      *
-     * @author	Benjamin "Nefarius" Höglinger
+     * @author	Benjamin "Nefarius" Hï¿½glinger
      * @date	28.08.2017
      *
      * @param 	target	The target device object.
@@ -401,7 +411,7 @@ extern "C" {
     /**
      * Overrides the default Product ID value with the provided one.
      *
-     * @author	Benjamin "Nefarius" Höglinger
+     * @author	Benjamin "Nefarius" Hï¿½glinger
      * @date	28.08.2017
      *
      * @param 	target	The target device object.
@@ -415,7 +425,7 @@ extern "C" {
     /**
      * Returns the Vendor ID of the provided target device object.
      *
-     * @author	Benjamin "Nefarius" Höglinger
+     * @author	Benjamin "Nefarius" Hï¿½glinger
      * @date	28.08.2017
      *
      * @param 	target	The target device object.
@@ -429,7 +439,7 @@ extern "C" {
     /**
      * Returns the Product ID of the provided target device object.
      *
-     * @author	Benjamin "Nefarius" Höglinger
+     * @author	Benjamin "Nefarius" Hï¿½glinger
      * @date	28.08.2017
      *
      * @param 	target	The target device object.
@@ -443,7 +453,7 @@ extern "C" {
     /**
      * Sends a state report to the provided target device.
      *
-     * @author	Benjamin "Nefarius" Höglinger
+     * @author	Benjamin "Nefarius" Hï¿½glinger
      * @date	28.08.2017
      *
      * @param 	vigem 	The driver connection object.
@@ -462,7 +472,7 @@ extern "C" {
      * DEPRECATED. Sends a state report to the provided target device. It's recommended to use
      * vigem_target_ds4_update_ex instead to utilize all DS4 features like touch, gyro etc.
      *
-     * @author	Benjamin "Nefarius" Höglinger
+     * @author	Benjamin "Nefarius" Hï¿½glinger
      * @date	28.08.2017
      *
      * @param 	vigem 	The driver connection object.
@@ -481,7 +491,7 @@ extern "C" {
      * Sends a full size state report to the provided target device. It's recommended to use this
      * function over vigem_target_ds4_update.
      *
-     * @author	Benjamin "Nefarius" Höglinger-Stelzer
+     * @author	Benjamin "Nefarius" Hï¿½glinger-Stelzer
      * @date	07.09.2020
      *
      * @param 	vigem 	The driver connection object.
@@ -505,7 +515,7 @@ extern "C" {
      *               device is removed from the bus and may change on the next addition of the
      *               device.
      *
-     * @author	Benjamin "Nefarius" Höglinger
+     * @author	Benjamin "Nefarius" Hï¿½glinger
      * @date	28.08.2017
      *
      * @param 	target	The target device object.
@@ -519,7 +529,7 @@ extern "C" {
     /**
      * Returns the type of the provided target device object.
      *
-     * @author	Benjamin "Nefarius" Höglinger
+     * @author	Benjamin "Nefarius" Hï¿½glinger
      * @date	28.08.2017
      *
      * @param 	target	The target device object.
@@ -534,7 +544,7 @@ extern "C" {
      * Returns TRUE if the provided target device object is currently attached to the bus,
      *              FALSE otherwise.
      *
-     * @author	Benjamin "Nefarius" Höglinger
+     * @author	Benjamin "Nefarius" Hï¿½glinger
      * @date	30.08.2017
      *
      * @param 	target	The target device object.
@@ -551,7 +561,7 @@ extern "C" {
      *                physical controller and is compatible to the dwUserIndex property of the
      *                XInput* APIs.
      *
-     * @author	Benjamin "Nefarius" Höglinger
+     * @author	Benjamin "Nefarius" Hï¿½glinger
      * @date	10.05.2018
      *
      * @param 	vigem 	The driver connection object.
@@ -574,7 +584,7 @@ extern "C" {
      * is recommended to repeatedly call this function in a thread. The call aborts with an error
      * code if the target gets unplugged in parallel.
      *
-     * @author	Benjamin "Nefarius" Höglinger-Stelzer
+     * @author	Benjamin "Nefarius" Hï¿½glinger-Stelzer
      * @date	06.08.2022
      *
      * @param 	vigem 	The driver connection object.
@@ -600,7 +610,7 @@ extern "C" {
      * parallel. If a timeout of INFINITE is specified, the function basically behaves identical to
      * vigem_target_ds4_await_output_report.
      *
-     * @author	Benjamin "Nefarius" Höglinger-Stelzer
+     * @author	Benjamin "Nefarius" Hï¿½glinger-Stelzer
      * @date	12.08.2022
      *
      * @param 	vigem			The driver connection object.

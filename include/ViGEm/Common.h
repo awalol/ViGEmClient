@@ -37,7 +37,11 @@ typedef enum _VIGEM_TARGET_TYPE
     //
     // Sony DualShock 4 (wired)
     // 
-    DualShock4Wired = 2 // NOTE: 1 skipped on purpose to maintain compatibility
+    DualShock4Wired = 2, // NOTE: 1 skipped on purpose to maintain compatibility
+	//
+	// Sony DualSense 5 (wired)
+	//
+	DualSense5Wired = 3
 
 } VIGEM_TARGET_TYPE, *PVIGEM_TARGET_TYPE;
 

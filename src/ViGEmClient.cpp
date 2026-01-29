@@ -222,6 +222,7 @@ VIGEM_ERROR vigem_connect(PVIGEM_CLIENT vigem)
 		return VIGEM_ERROR_BUS_ALREADY_CONNECTED;
 	}
 
+	// 通过 GUID 查找 ViGEm 总线设备
 	const auto deviceInfoSet = SetupDiGetClassDevs(
 		&GUID_DEVINTERFACE_BUSENUM_VIGEM,
 		nullptr,
@@ -393,6 +394,20 @@ PVIGEM_TARGET vigem_target_ds4_alloc(void)
 	return target;
 }
 
+PVIGEM_TARGET vigem_target_ds5_alloc(void)
+{
+	const auto target = VIGEM_TARGET_ALLOC_INIT(DualSense5Wired);
+
+	if (!target)
+		return nullptr;
+
+	target->VendorId = 0x054C;
+	target->ProductId = 0x0CE6;
+	// target->Ds4CachedOutputReportUpdateAvailable = CreateEvent(NULL, FALSE, FALSE, NULL);
+
+	return target;
+}
+
 void vigem_target_free(PVIGEM_TARGET target)
 {
 	if (target)
@@ -464,6 +479,7 @@ VIGEM_ERROR vigem_target_add(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
 			 * perfect and can cause other functions to fail if called too soon but
 			 * hopefully the applications will just ignore these errors and retry ;)
 			 */
+			// 功能：通知 ViGEm 总线驱动创建并注册一个虚拟 HID 设备（如 Xbox 360 或 DS4 控制器）。
 			DeviceIoControl(
 				vigem->hBusDevice,
 				IOCTL_VIGEM_PLUGIN_TARGET,
