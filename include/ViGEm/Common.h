@@ -163,6 +163,23 @@ typedef enum _DS4_DPAD_DIRECTIONS
 } DS4_DPAD_DIRECTIONS, *PDS4_DPAD_DIRECTIONS;
 
 //
+// DualSense 5 directional pad (HAT) values
+// 
+typedef enum _DS5_DPAD_DIRECTIONS
+{
+	DS5_BUTTON_DPAD_NONE        = 0x8,
+	DS5_BUTTON_DPAD_NORTHWEST   = 0x7,
+	DS5_BUTTON_DPAD_WEST        = 0x6,
+	DS5_BUTTON_DPAD_SOUTHWEST   = 0x5,
+	DS5_BUTTON_DPAD_SOUTH       = 0x4,
+	DS5_BUTTON_DPAD_SOUTHEAST   = 0x3,
+	DS5_BUTTON_DPAD_EAST        = 0x2,
+	DS5_BUTTON_DPAD_NORTHEAST   = 0x1,
+	DS5_BUTTON_DPAD_NORTH       = 0x0
+
+} DS5_DPAD_DIRECTIONS, *PDS5_DPAD_DIRECTIONS;
+
+//
 // DualShock 4 HID Input report
 // 
 typedef struct _DS4_REPORT
@@ -179,6 +196,22 @@ typedef struct _DS4_REPORT
 } DS4_REPORT, *PDS4_REPORT;
 
 //
+// DualSense 5 HID Input report
+// 
+typedef struct _DS5_REPORT
+{
+	BYTE bThumbLX;
+	BYTE bThumbLY;
+	BYTE bThumbRX;
+	BYTE bThumbRY;
+	USHORT wButtons;
+	BYTE bSpecial;
+	BYTE bTriggerL;
+	BYTE bTriggerR;
+
+} DS5_REPORT, *PDS5_REPORT;
+
+//
 // Sets the current state of the D-PAD on a DualShock 4 report.
 // 
 VOID FORCEINLINE DS4_SET_DPAD(
@@ -188,6 +221,18 @@ VOID FORCEINLINE DS4_SET_DPAD(
 {
     Report->wButtons &= ~0xF;
     Report->wButtons |= (USHORT)Dpad;
+}
+
+//
+// Sets the current state of the D-PAD on a DualShock 4 report.
+// 
+VOID FORCEINLINE DS5_SET_DPAD(
+	_Out_ PDS5_REPORT Report,
+	_In_ DS5_DPAD_DIRECTIONS Dpad
+)
+{
+	Report->wButtons &= ~0xF;
+	Report->wButtons |= (USHORT)Dpad;
 }
 
 VOID FORCEINLINE DS4_REPORT_INIT(
@@ -202,6 +247,20 @@ VOID FORCEINLINE DS4_REPORT_INIT(
     Report->bThumbRY = 0x80;
 
     DS4_SET_DPAD(Report, DS4_BUTTON_DPAD_NONE);
+}
+
+VOID FORCEINLINE DS5_REPORT_INIT(
+	_Out_ PDS5_REPORT Report
+)
+{
+	RtlZeroMemory(Report, sizeof(DS4_REPORT));
+
+	Report->bThumbLX = 0x80;
+	Report->bThumbLY = 0x80;
+	Report->bThumbRX = 0x80;
+	Report->bThumbRY = 0x80;
+
+	DS5_SET_DPAD(Report, DS5_BUTTON_DPAD_NONE);
 }
 
 #include <pshpack1.h> // pack structs tightly
@@ -265,5 +324,14 @@ typedef struct _DS4_OUTPUT_BUFFER
 	_Out_ UCHAR Buffer[64];
 	
 } DS4_OUTPUT_BUFFER, *PDS4_OUTPUT_BUFFER;
+
+typedef struct _DS5_OUTPUT_BUFFER
+{
+	//
+	// The output report buffer
+	// 
+	_Out_ UCHAR Buffer[64];
+	
+} DS5_OUTPUT_BUFFER, *PDS5_OUTPUT_BUFFER;
 
 #include <poppack.h>

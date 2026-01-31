@@ -626,6 +626,13 @@ extern "C" {
         DWORD milliseconds,
         PDS4_OUTPUT_BUFFER buffer
     );
+    
+    VIGEM_API VIGEM_ERROR vigem_target_ds5_await_output_report_timeout(
+        PVIGEM_CLIENT vigem, 
+        PVIGEM_TARGET target,
+        DWORD milliseconds,
+        PDS5_OUTPUT_BUFFER buffer
+    );
 
 #ifdef __cplusplus
 }
