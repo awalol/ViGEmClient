@@ -242,16 +242,6 @@ extern "C" {
      * @returns	A PVIGEM_TARGET representing a DualShock 4 Controller device.
      */
     VIGEM_API PVIGEM_TARGET vigem_target_ds4_alloc(void);
-    
-    /**
-     * Allocates an object representing a DualSense 5 Controller device.
-     *
-     * @author	awalol
-     * @date	28.01.2026
-     *
-     * @returns	A PVIGEM_TARGET representing a DualSense 5 Controller device.
-     */
-    VIGEM_API PVIGEM_TARGET vigem_target_ds5_alloc(void);
 
     /**
      * Frees up memory used by the target device object. This does not automatically remove
@@ -625,13 +615,6 @@ extern "C" {
         PVIGEM_TARGET target,
         DWORD milliseconds,
         PDS4_OUTPUT_BUFFER buffer
-    );
-    
-    VIGEM_API VIGEM_ERROR vigem_target_ds5_await_output_report_timeout(
-        PVIGEM_CLIENT vigem, 
-        PVIGEM_TARGET target,
-        DWORD milliseconds,
-        PDS5_OUTPUT_BUFFER buffer
     );
 
 #ifdef __cplusplus
