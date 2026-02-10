@@ -478,25 +478,6 @@ extern "C" {
     );
 
     /**
-     * Sends a full size state report to the provided target device. It's recommended to use this
-     * function over vigem_target_ds4_update.
-     *
-     * @author	Benjamin "Nefarius" H�glinger-Stelzer
-     * @date	07.09.2020
-     *
-     * @param 	vigem 	The driver connection object.
-     * @param 	target	The target device object.
-     * @param 	report	The report buffer.
-     *
-     * @returns	A VIGEM_ERROR.
-     */
-    VIGEM_API VIGEM_ERROR vigem_target_ds4_update_ex(
-        PVIGEM_CLIENT vigem, 
-        PVIGEM_TARGET target, 
-        DS4_REPORT_EX report
-    );
-
-    /**
      * Returns the internal index (serial number) the bus driver assigned to the provided
      *               target device object. Note that this value is specific to the inner workings of
      *               the bus driver, it does not reflect related values like player index or device
@@ -615,6 +596,40 @@ extern "C" {
         PVIGEM_TARGET target,
         DWORD milliseconds,
         PDS4_OUTPUT_BUFFER buffer
+    );
+
+    /**
+     * Waits until there's one or more pending audio data buffers available to consume. This
+     * function blocks until data becomes available or the device gets disconnected.
+     *
+     * @param 	vigem 	The driver connection object.
+     * @param 	target	The target device object.
+     * @param 	buffer	The audio data buffer that gets written to.
+     *
+     * @returns	A VIGEM_ERROR.
+     */
+    VIGEM_API VIGEM_ERROR vigem_target_ds4_await_audio_data(
+        PVIGEM_CLIENT vigem, 
+        PVIGEM_TARGET target, 
+        PDS4_AUDIO_BUFFER buffer
+    );
+
+    /**
+     * Waits until there's one or more pending audio data buffers available to consume. This
+     * function blocks until data becomes available or the provided timeout has been reached.
+     *
+     * @param 	vigem			The driver connection object.
+     * @param 	target			The target device object.
+     * @param 	milliseconds	The timeout in milliseconds.
+     * @param 	buffer			The audio data buffer that gets written to.
+     *
+     * @returns	A VIGEM_ERROR.
+     */
+    VIGEM_API VIGEM_ERROR vigem_target_ds4_await_audio_data_timeout(
+        PVIGEM_CLIENT vigem, 
+        PVIGEM_TARGET target,
+        DWORD milliseconds,
+        PDS4_AUDIO_BUFFER buffer
     );
 
 #ifdef __cplusplus

@@ -72,6 +72,7 @@ DEFINE_GUID(GUID_DEVINTERFACE_BUSENUM_VIGEM,
 //#define IOCTL_XGIP_SUBMIT_INTERRUPT     BUSENUM_W_IOCTL (IOCTL_VIGEM_BASE + 0x205)
 #define IOCTL_XUSB_GET_USER_INDEX           BUSENUM_RW_IOCTL(IOCTL_VIGEM_BASE + 0x206)
 #define IOCTL_DS4_AWAIT_OUTPUT_AVAILABLE    BUSENUM_RW_IOCTL(IOCTL_VIGEM_BASE + 0x207)
+#define IOCTL_DS4_AWAIT_AUDIO_DATA          BUSENUM_RW_IOCTL(IOCTL_VIGEM_BASE + 0x208)
 
 
 //
@@ -425,46 +426,6 @@ VOID FORCEINLINE DS4_SUBMIT_REPORT_INIT(
     DS4_REPORT_INIT(&Report->Report);
 }
 
-#include <pshpack1.h>
-
-//
-// DualShock 4 extended report request
-// 
-typedef struct _DS4_SUBMIT_REPORT_EX
-{
-    //
-     // sizeof(struct _DS4_SUBMIT_REPORT_EX)
-     // 
-    _In_ ULONG Size;
-
-    //
-    // Serial number of target device.
-    // 
-    _In_ ULONG SerialNo;
-
-    //
-    // Full size HID report excluding fixed Report ID.
-    // 
-    _In_ DS4_REPORT_EX Report;
-
-} DS4_SUBMIT_REPORT_EX, * PDS4_SUBMIT_REPORT_EX;
-
-#include <poppack.h>
-
-//
-// Initializes a DualShock 4 extended report.
-// 
-VOID FORCEINLINE DS4_SUBMIT_REPORT_EX_INIT(
-    _Out_ PDS4_SUBMIT_REPORT_EX Report,
-    _In_ ULONG SerialNo
-)
-{
-    RtlZeroMemory(Report, sizeof(DS4_SUBMIT_REPORT_EX));
-
-    Report->Size = sizeof(DS4_SUBMIT_REPORT_EX);
-    Report->SerialNo = SerialNo;
-}
-
 #pragma endregion
 
 #pragma region DS4 Await Output
@@ -501,6 +462,56 @@ VOID FORCEINLINE DS4_AWAIT_OUTPUT_INIT(
 
 	Output->Size = sizeof(DS4_AWAIT_OUTPUT);
     Output->SerialNo = SerialNo;
+}
+
+#pragma endregion
+
+#pragma region DS4 Await Audio Data
+
+//
+// Maximum audio data size per notification (covers typical ISO URB payload)
+//
+#ifndef DS4_AUDIO_DATA_MAX_SIZE
+#define DS4_AUDIO_DATA_MAX_SIZE 4096
+#endif
+
+#include <pshpack1.h>
+
+typedef struct _DS4_AUDIO_DATA
+{
+	//
+	// sizeof(struct _DS4_AUDIO_DATA)
+	//
+	_In_ ULONG Size;
+
+	//
+	// Serial number of target device.
+	//
+	_Inout_ ULONG SerialNo;
+
+	//
+	// Actual audio data length in bytes
+	//
+	_Out_ ULONG AudioDataLength;
+
+	//
+	// Audio data payload
+	//
+	_Out_ UCHAR AudioData[DS4_AUDIO_DATA_MAX_SIZE];
+
+} DS4_AUDIO_DATA, * PDS4_AUDIO_DATA;
+
+#include <poppack.h>
+
+VOID FORCEINLINE DS4_AUDIO_DATA_INIT(
+	_Out_ PDS4_AUDIO_DATA AudioData,
+	_In_ ULONG SerialNo
+)
+{
+	RtlZeroMemory(AudioData, sizeof(DS4_AUDIO_DATA));
+
+	AudioData->Size = sizeof(DS4_AUDIO_DATA);
+	AudioData->SerialNo = SerialNo;
 }
 
 #pragma endregion

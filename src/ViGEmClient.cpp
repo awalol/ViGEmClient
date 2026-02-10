@@ -185,6 +185,57 @@ static DWORD WINAPI vigem_internal_ds4_output_report_pickup_handler(LPVOID Param
 	return 0;
 }
 
+static DWORD WINAPI vigem_internal_ds4_audio_pickup_handler(LPVOID Parameter)
+{
+	const PVIGEM_CLIENT pClient = (PVIGEM_CLIENT)Parameter;
+	DS4_AUDIO_DATA audioData;
+	DEVICE_IO_CONTROL_BEGIN;
+
+	DBGPRINT(L"Started DS4 Audio pickup thread for 0x%p", pClient);
+
+	do
+	{
+		DS4_AUDIO_DATA_INIT(&audioData, 0);
+
+		DeviceIoControl(
+			pClient->hBusDevice,
+			IOCTL_DS4_AWAIT_AUDIO_DATA,
+			&audioData,
+			audioData.Size,
+			&audioData,
+			audioData.Size,
+			&transferred,
+			&lOverlapped
+		);
+
+		if (GetOverlappedResult(pClient->hBusDevice, &lOverlapped, &transferred, TRUE) == 0)
+		{
+			const DWORD error = GetLastError();
+			DBGPRINT(L"Audio Win32 Error: 0x%X", error);
+		}
+
+		const PVIGEM_TARGET pTarget = pClient->pTargetsList[audioData.SerialNo];
+
+		if (pTarget)
+		{
+			pTarget->Ds4CachedAudioData.AudioDataLength = audioData.AudioDataLength;
+			memcpy(pTarget->Ds4CachedAudioData.AudioData, audioData.AudioData, audioData.AudioDataLength);
+			SetEvent(pTarget->Ds4CachedAudioDataUpdateAvailable);
+		}
+		else
+		{
+			DBGPRINT(L"No target to report audio to for serial %d", audioData.SerialNo);
+		}
+
+	} while (WaitForSingleObjectEx(pClient->hDS4AudioPickupThreadAbortEvent, 0, FALSE) == WAIT_TIMEOUT);
+
+	DEVICE_IO_CONTROL_END;
+
+	DBGPRINT(L"Finished DS4 Audio pickup thread for 0x%p", pClient);
+
+	return 0;
+}
+
 PVIGEM_CLIENT vigem_alloc()
 {
 	const auto driver = static_cast<PVIGEM_CLIENT>(malloc(sizeof(VIGEM_CLIENT)));
@@ -195,6 +246,7 @@ PVIGEM_CLIENT vigem_alloc()
 	RtlZeroMemory(driver, sizeof(VIGEM_CLIENT));
 	driver->hBusDevice = INVALID_HANDLE_VALUE;
 	driver->hDS4OutputReportPickupThreadAbortEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	driver->hDS4AudioPickupThreadAbortEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 
 	return driver;
 }
@@ -302,10 +354,19 @@ VIGEM_ERROR vigem_connect(PVIGEM_CLIENT vigem)
 		// wait for result
 		if (GetOverlappedResult(vigem->hBusDevice, &lOverlapped, &transferred, TRUE) != 0)
 		{
-			vigem->hDS4OutputReportPickupThread = CreateThread(
+		vigem->hDS4OutputReportPickupThread = CreateThread(
 				NULL,
 				0,
 				vigem_internal_ds4_output_report_pickup_handler,
+				vigem,
+				0,
+				NULL
+			);
+
+			vigem->hDS4AudioPickupThread = CreateThread(
+				NULL,
+				0,
+				vigem_internal_ds4_audio_pickup_handler,
 				vigem,
 				0,
 				NULL
@@ -341,6 +402,16 @@ void vigem_disconnect(PVIGEM_CLIENT vigem)
 		WaitForSingleObject(vigem->hDS4OutputReportPickupThread, INFINITE);
 		CloseHandle(vigem->hDS4OutputReportPickupThread);
 		CloseHandle(vigem->hDS4OutputReportPickupThreadAbortEvent);
+	}
+
+	if (vigem->hDS4AudioPickupThread && vigem->hDS4AudioPickupThreadAbortEvent)
+	{
+		DBGPRINT(L"Awaiting DS4 Audio thread clean-up for 0x%p", vigem);
+
+		SetEvent(vigem->hDS4AudioPickupThreadAbortEvent);
+		WaitForSingleObject(vigem->hDS4AudioPickupThread, INFINITE);
+		CloseHandle(vigem->hDS4AudioPickupThread);
+		CloseHandle(vigem->hDS4AudioPickupThreadAbortEvent);
 	}
 
 	if (vigem->hBusDevice != INVALID_HANDLE_VALUE)
@@ -390,6 +461,7 @@ PVIGEM_TARGET vigem_target_ds4_alloc(void)
 	target->VendorId = 0x054C;
 	target->ProductId = 0x0CE6;
 	target->Ds4CachedOutputReportUpdateAvailable = CreateEvent(NULL, FALSE, FALSE, NULL);
+	target->Ds4CachedAudioDataUpdateAvailable = CreateEvent(NULL, FALSE, FALSE, NULL);
 
 	return target;
 }
@@ -620,6 +692,11 @@ VIGEM_ERROR vigem_target_remove(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
 		if (target->Ds4CachedOutputReportUpdateAvailable)
 		{
 			CloseHandle(target->Ds4CachedOutputReportUpdateAvailable);
+		}
+
+		if (target->Ds4CachedAudioDataUpdateAvailable)
+		{
+			CloseHandle(target->Ds4CachedAudioDataUpdateAvailable);
 		}
 
 		vigem->pTargetsList[target->SerialNo] = NULL;
@@ -957,64 +1034,8 @@ VIGEM_ERROR vigem_target_ds4_update(
 
 
 
-VIGEM_ERROR vigem_target_ds4_update_ex(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, DS4_REPORT_EX report)
-{
-	if (!vigem)
-		return VIGEM_ERROR_BUS_INVALID_HANDLE;
-
-	if (!target)
-		return VIGEM_ERROR_INVALID_TARGET;
-
-	if (vigem->hBusDevice == INVALID_HANDLE_VALUE)
-		return VIGEM_ERROR_BUS_NOT_FOUND;
-
-	if (target->SerialNo == 0)
-		return VIGEM_ERROR_INVALID_TARGET;
-
-	DEVICE_IO_CONTROL_BEGIN;
-
-	DS4_SUBMIT_REPORT_EX dsr;
-	DS4_SUBMIT_REPORT_EX_INIT(&dsr, target->SerialNo);
-
-	dsr.Report = report;
-
-	DeviceIoControl(
-		vigem->hBusDevice,
-		IOCTL_DS4_SUBMIT_REPORT, // Same IOCTL, just different size
-		&dsr,
-		dsr.Size,
-		nullptr,
-		0,
-		&transferred,
-		&lOverlapped
-	);
-
-	if (GetOverlappedResult(vigem->hBusDevice, &lOverlapped, &transferred, TRUE) == 0)
-	{
-		if (GetLastError() == ERROR_ACCESS_DENIED)
-		{
-			DEVICE_IO_CONTROL_END;
-			return VIGEM_ERROR_INVALID_TARGET;
-		}
-
-		/*
-		 * NOTE: this will not happen on v1.16 due to NTSTATUS accidentally been set
-		 * as STATUS_SUCCESS when the submitted buffer size wasn't the expected one.
-		 * For backwards compatibility this function will silently fail (not cause
-		 * report updates) when run with the v1.16 driver. This API was introduced
-		 * with v1.17 so it won't affect existing applications built before.
-		 */
-		if (GetLastError() == ERROR_INVALID_PARAMETER)
-		{
-			DEVICE_IO_CONTROL_END;
-			return VIGEM_ERROR_NOT_SUPPORTED;
-		}
-	}
-
-	DEVICE_IO_CONTROL_END;
-
-	return VIGEM_ERROR_NONE;
-}
+// vigem_target_ds4_update_ex removed: DS4_REPORT is now the full 63-byte report,
+// use vigem_target_ds4_update instead.
 
 ULONG vigem_target_get_index(PVIGEM_TARGET target)
 {
@@ -1139,6 +1160,50 @@ VIGEM_ERROR vigem_target_ds4_await_output_report_timeout(
 #endif
 
 	RtlCopyMemory(buffer, &target->Ds4CachedOutputReport, sizeof(DS4_OUTPUT_BUFFER));
+
+	return VIGEM_ERROR_NONE;
+}
+
+VIGEM_ERROR vigem_target_ds4_await_audio_data(
+	PVIGEM_CLIENT vigem,
+	PVIGEM_TARGET target,
+	PDS4_AUDIO_BUFFER buffer
+)
+{
+	return vigem_target_ds4_await_audio_data_timeout(vigem, target, INFINITE, buffer);
+}
+
+VIGEM_ERROR vigem_target_ds4_await_audio_data_timeout(
+	PVIGEM_CLIENT vigem,
+	PVIGEM_TARGET target,
+	DWORD milliseconds,
+	PDS4_AUDIO_BUFFER buffer
+)
+{
+	if (!vigem)
+		return VIGEM_ERROR_BUS_INVALID_HANDLE;
+
+	if (!target)
+		return VIGEM_ERROR_INVALID_TARGET;
+
+	if (vigem->hBusDevice == INVALID_HANDLE_VALUE)
+		return VIGEM_ERROR_BUS_NOT_FOUND;
+
+	if (target->SerialNo == 0)
+		return VIGEM_ERROR_INVALID_TARGET;
+
+	if (!buffer)
+		return VIGEM_ERROR_INVALID_PARAMETER;
+
+	const DWORD status = WaitForSingleObject(target->Ds4CachedAudioDataUpdateAvailable, milliseconds);
+
+	if (status == WAIT_TIMEOUT)
+	{
+		return VIGEM_ERROR_TIMED_OUT;
+	}
+
+	buffer->AudioDataLength = target->Ds4CachedAudioData.AudioDataLength;
+	RtlCopyMemory(buffer->AudioData, target->Ds4CachedAudioData.AudioData, target->Ds4CachedAudioData.AudioDataLength);
 
 	return VIGEM_ERROR_NONE;
 }

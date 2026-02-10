@@ -158,19 +158,116 @@ typedef enum _DS4_DPAD_DIRECTIONS
 
 } DS4_DPAD_DIRECTIONS, *PDS4_DPAD_DIRECTIONS;
 
+#include <pshpack1.h> // pack structs tightly
+
 //
-// DualShock 4 HID Input report
-// 
+// DualShock 4 HID Touch finger data (4 bytes)
+//
+typedef struct _DS4_TOUCH_FINGER
+{
+    /*0.0*/ ULONG Index : 7;
+    /*0.7*/ ULONG NotTouching : 1;
+    /*1.0*/ ULONG FingerX : 12;
+    /*2.4*/ ULONG FingerY : 12;
+} DS4_TOUCH_FINGER, *PDS4_TOUCH_FINGER;
+
+//
+// DualShock 4 HID Touchpad structure (9 bytes)
+//
+typedef struct _DS4_TOUCH
+{
+    /*0*/ DS4_TOUCH_FINGER Finger[2];
+    /*8*/ BYTE bTimestamp;
+} DS4_TOUCH, *PDS4_TOUCH;
+
+//
+// DualShock 4 HID Input report (USB Get State Data - 63 bytes)
+//
 typedef struct _DS4_REPORT
 {
-    BYTE bThumbLX;
-    BYTE bThumbLY;
-    BYTE bThumbRX;
-    BYTE bThumbRY;
-    USHORT wButtons;
-    BYTE bSpecial;
-    BYTE bTriggerL;
-    BYTE bTriggerR;
+    /* 0  */ BYTE bThumbLX;
+    /* 1  */ BYTE bThumbLY;
+    /* 2  */ BYTE bThumbRX;
+    /* 3  */ BYTE bThumbRY;
+    /* 4  */ BYTE bTriggerL;
+    /* 5  */ BYTE bTriggerR;
+    /* 6  */ BYTE bSeqNo;                  // always 0x01 on BT
+
+    // Byte 7: DPad + face buttons
+    /* 7.0*/ BYTE DPad : 4;
+    /* 7.4*/ BYTE ButtonSquare : 1;
+    /* 7.5*/ BYTE ButtonCross : 1;
+    /* 7.6*/ BYTE ButtonCircle : 1;
+    /* 7.7*/ BYTE ButtonTriangle : 1;
+
+    // Byte 8: shoulder/trigger/menu/thumbstick buttons
+    /* 8.0*/ BYTE ButtonL1 : 1;
+    /* 8.1*/ BYTE ButtonR1 : 1;
+    /* 8.2*/ BYTE ButtonL2 : 1;
+    /* 8.3*/ BYTE ButtonR2 : 1;
+    /* 8.4*/ BYTE ButtonCreate : 1;
+    /* 8.5*/ BYTE ButtonOptions : 1;
+    /* 8.6*/ BYTE ButtonL3 : 1;
+    /* 8.7*/ BYTE ButtonR3 : 1;
+
+    // Byte 9: special buttons
+    /* 9.0*/ BYTE ButtonHome : 1;
+    /* 9.1*/ BYTE ButtonPad : 1;
+    /* 9.2*/ BYTE ButtonMute : 1;
+    /* 9.3*/ BYTE UNK1 : 1;               // appears unused
+    /* 9.4*/ BYTE ButtonLeftFunction : 1;  // DualSense Edge
+    /* 9.5*/ BYTE ButtonRightFunction : 1; // DualSense Edge
+    /* 9.6*/ BYTE ButtonLeftPaddle : 1;    // DualSense Edge
+    /* 9.7*/ BYTE ButtonRightPaddle : 1;   // DualSense Edge
+
+    /*10  */ BYTE bUNK2;                   // appears unused
+    /*11  */ ULONG ulUNKCounter;           // Linux driver calls this reserved
+    /*15  */ SHORT wAngularVelocityX;
+    /*17  */ SHORT wAngularVelocityZ;
+    /*19  */ SHORT wAngularVelocityY;
+    /*21  */ SHORT wAccelerometerX;
+    /*23  */ SHORT wAccelerometerY;
+    /*25  */ SHORT wAccelerometerZ;
+    /*27  */ ULONG ulSensorTimestamp;
+    /*31  */ CHAR bTemperature;            // reserved2 in Linux driver
+    /*32  */ DS4_TOUCH sCurrentTouch;      // 9 bytes touch data
+
+    // Byte 41: trigger feedback
+    /*41.0*/ BYTE TriggerRightStopLocation : 4; // range 0-9
+    /*41.4*/ BYTE TriggerRightStatus : 4;
+    /*42.0*/ BYTE TriggerLeftStopLocation : 4;
+    /*42.4*/ BYTE TriggerLeftStatus : 4;   // 0 feedbackNoLoad / 1 feedbackLoadApplied
+                                           // 0 weaponReady / 1 weaponFiring / 2 weaponFired
+                                           // 0 vibrationNotVibrating / 1 vibrationIsVibrating
+
+    /*43  */ ULONG ulHostTimestamp;         // mirrors data from report write
+
+    // Byte 47: active trigger effect
+    /*47.0*/ BYTE TriggerRightEffect : 4;  // 0 reset, 1 feedback, 2 weapon, 3 vibration
+    /*47.4*/ BYTE TriggerLeftEffect : 4;
+
+    /*48  */ ULONG ulDeviceTimeStamp;
+
+    // Byte 52: power info
+    /*52.0*/ BYTE PowerPercent : 4;        // 0x00-0x0A
+    /*52.4*/ BYTE PowerState : 4;
+
+    // Byte 53: plugged device info
+    /*53.0*/ BYTE PluggedHeadphones : 1;
+    /*53.1*/ BYTE PluggedMic : 1;
+    /*53.2*/ BYTE MicMuted : 1;            // Mic muted by powersave/mute command
+    /*53.3*/ BYTE PluggedUsbData : 1;
+    /*53.4*/ BYTE PluggedUsbPower : 1;     // cannot be 1 if PluggedUsbData is 1
+    /*53.5*/ BYTE UsbPowerOnBT : 1;        // only 1 if BT connected and USB powered
+    /*53.6*/ BYTE DockDetect : 1;
+    /*53.7*/ BYTE PluggedUnk : 1;
+
+    // Byte 54
+    /*54.0*/ BYTE PluggedExternalMic : 1;  // Is external mic active
+    /*54.1*/ BYTE HapticLowPassFilter : 1; // Is the Haptic Low-Pass-Filter active
+    /*54.2*/ BYTE PluggedUnk3 : 6;
+
+    /*55  */ BYTE bAesCmac[8];
 
 } DS4_REPORT, *PDS4_REPORT;
 
@@ -182,8 +279,7 @@ VOID FORCEINLINE DS4_SET_DPAD(
     _In_ DS4_DPAD_DIRECTIONS Dpad
 )
 {
-    Report->wButtons &= ~0xF;
-    Report->wButtons |= (USHORT)Dpad;
+    Report->DPad = (BYTE)Dpad;
 }
 
 VOID FORCEINLINE DS4_REPORT_INIT(
@@ -200,59 +296,6 @@ VOID FORCEINLINE DS4_REPORT_INIT(
     DS4_SET_DPAD(Report, DS4_BUTTON_DPAD_NONE);
 }
 
-#include <pshpack1.h> // pack structs tightly
-//
-// DualShock 4 HID Touchpad structure
-//
-typedef struct _DS4_TOUCH
-{
-    BYTE bPacketCounter;    // timestamp / packet counter associated with touch event
-    BYTE bIsUpTrackingNum1; // 0 means down; active low
-                            // unique to each finger down, so for a lift and repress the value is incremented
-    BYTE bTouchData1[3];    // Two 12 bits values (for X and Y) 
-                            // middle byte holds last 4 bits of X and the starting 4 bits of Y
-    BYTE bIsUpTrackingNum2; // second touch data immediately follows data of first touch 
-    BYTE bTouchData2[3];    // resolution is 1920x943
-} DS4_TOUCH, * PDS4_TOUCH;
-
-//
-// DualShock 4 v1 complete HID Input report
-//
-typedef struct _DS4_REPORT_EX
-{
-	union
-	{
-		struct
-		{
-			BYTE bThumbLX;
-			BYTE bThumbLY;
-			BYTE bThumbRX;
-			BYTE bThumbRY;
-			USHORT wButtons;
-			BYTE bSpecial;
-			BYTE bTriggerL;
-			BYTE bTriggerR;
-			USHORT wTimestamp;
-			BYTE bBatteryLvl;
-			SHORT wGyroX;
-			SHORT wGyroY;
-			SHORT wGyroZ;
-			SHORT wAccelX;
-			SHORT wAccelY;
-			SHORT wAccelZ;
-			BYTE _bUnknown1[5];
-			BYTE bBatteryLvlSpecial;
-			// really should have a enum to show everything that this can represent (USB charging, battery level; EXT, headset, microphone connected)
-			BYTE _bUnknown2[2];
-			BYTE bTouchPacketsN; // 0x00 to 0x03 (USB max)
-			DS4_TOUCH sCurrentTouch;
-			DS4_TOUCH sPreviousTouch[2];
-		} Report;
-
-		UCHAR ReportBuffer[63];
-	};
-} DS4_REPORT_EX, *PDS4_REPORT_EX;
-
 typedef struct _DS4_OUTPUT_BUFFER
 {
 	//
@@ -261,5 +304,29 @@ typedef struct _DS4_OUTPUT_BUFFER
 	_Out_ UCHAR Buffer[64];
 	
 } DS4_OUTPUT_BUFFER, *PDS4_OUTPUT_BUFFER;
+
+//
+// Maximum audio data size per buffer
+//
+#ifndef DS4_AUDIO_DATA_MAX_SIZE
+#define DS4_AUDIO_DATA_MAX_SIZE 4096
+#endif
+
+//
+// DualShock 4 audio data buffer for user-mode consumption
+//
+typedef struct _DS4_AUDIO_BUFFER
+{
+	//
+	// Actual audio data length in bytes
+	//
+	_Out_ ULONG AudioDataLength;
+
+	//
+	// Audio data payload
+	//
+	_Out_ UCHAR AudioData[DS4_AUDIO_DATA_MAX_SIZE];
+
+} DS4_AUDIO_BUFFER, *PDS4_AUDIO_BUFFER;
 
 #include <poppack.h>
