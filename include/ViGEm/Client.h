@@ -142,18 +142,18 @@ extern "C" {
     typedef EVT_VIGEM_X360_NOTIFICATION *PFN_VIGEM_X360_NOTIFICATION;
 
     typedef
-        _Function_class_(EVT_VIGEM_DS4_NOTIFICATION)
+        _Function_class_(EVT_VIGEM_DS5_NOTIFICATION)
         VOID CALLBACK
-        EVT_VIGEM_DS4_NOTIFICATION(
+        EVT_VIGEM_DS5_NOTIFICATION(
             PVIGEM_CLIENT Client,
             PVIGEM_TARGET Target,
             UCHAR LargeMotor,
             UCHAR SmallMotor,
-            DS4_LIGHTBAR_COLOR LightbarColor,
+            DS5_LIGHTBAR_COLOR LightbarColor,
             LPVOID UserData
         );
 
-    typedef EVT_VIGEM_DS4_NOTIFICATION *PFN_VIGEM_DS4_NOTIFICATION;
+    typedef EVT_VIGEM_DS5_NOTIFICATION *PFN_VIGEM_DS5_NOTIFICATION;
 
     /**
      *  Allocates an object representing a driver connection
@@ -234,14 +234,14 @@ extern "C" {
     VIGEM_API PVIGEM_TARGET vigem_target_x360_alloc(void);
 
     /**
-     * Allocates an object representing a DualShock 4 Controller device.
+     * Allocates an object representing a DualSense 5 Controller device.
      *
      * @author	Benjamin "Nefarius" H�glinger-Stelzer
      * @date	28.08.2017
      *
-     * @returns	A PVIGEM_TARGET representing a DualShock 4 Controller device.
+     * @returns	A PVIGEM_TARGET representing a DualSense 5 Controller device.
      */
-    VIGEM_API PVIGEM_TARGET vigem_target_ds4_alloc(void);
+    VIGEM_API PVIGEM_TARGET vigem_target_DS5_alloc(void);
 
     /**
      * Frees up memory used by the target device object. This does not automatically remove
@@ -353,10 +353,10 @@ extern "C" {
      *
      * @returns	A VIGEM_ERROR.
      */
-    VIGEM_API VIGEM_ERROR vigem_target_ds4_register_notification(
+    VIGEM_API VIGEM_ERROR vigem_target_DS5_register_notification(
         PVIGEM_CLIENT vigem, 
         PVIGEM_TARGET target, 
-        PFN_VIGEM_DS4_NOTIFICATION notification, 
+        PFN_VIGEM_DS5_NOTIFICATION notification, 
         LPVOID userData
     );
 
@@ -380,7 +380,7 @@ extern "C" {
      *
      * @param 	target	The target device object.
      */
-    VIGEM_API void vigem_target_ds4_unregister_notification(
+    VIGEM_API void vigem_target_DS5_unregister_notification(
         PVIGEM_TARGET target
     );
 
@@ -460,7 +460,7 @@ extern "C" {
 
     /**
      * DEPRECATED. Sends a state report to the provided target device. It's recommended to use
-     * vigem_target_ds4_update_ex instead to utilize all DS4 features like touch, gyro etc.
+     * vigem_target_DS5_update_ex instead to utilize all DS5 features like touch, gyro etc.
      *
      * @author	Benjamin "Nefarius" H�glinger
      * @date	28.08.2017
@@ -471,10 +471,10 @@ extern "C" {
      *
      * @returns	A VIGEM_ERROR.
      */
-    VIGEM_API VIGEM_ERROR vigem_target_ds4_update(
+    VIGEM_API VIGEM_ERROR vigem_target_DS5_update(
         PVIGEM_CLIENT vigem, 
         PVIGEM_TARGET target, 
-        DS4_REPORT report
+        DS5_REPORT report
     );
 
     /**
@@ -564,10 +564,10 @@ extern "C" {
      *
      * @returns	A VIGEM_ERROR.
      */
-    VIGEM_API VIGEM_ERROR vigem_target_ds4_await_output_report(
+    VIGEM_API VIGEM_ERROR vigem_target_DS5_await_output_report(
         PVIGEM_CLIENT vigem, 
         PVIGEM_TARGET target, 
-        PDS4_OUTPUT_BUFFER buffer
+        PDS5_OUTPUT_BUFFER buffer
     );
 
     /**
@@ -579,7 +579,7 @@ extern "C" {
      * thread. A timeout of a few hundred milliseconds can be used to break out of the loop without
      * excessive CPU consumption. The call aborts with an error code if the target gets unplugged in
      * parallel. If a timeout of INFINITE is specified, the function basically behaves identical to
-     * vigem_target_ds4_await_output_report.
+     * vigem_target_DS5_await_output_report.
      *
      * @author	Benjamin "Nefarius" H�glinger-Stelzer
      * @date	12.08.2022
@@ -591,11 +591,11 @@ extern "C" {
      *
      * @returns	A VIGEM_ERROR.
      */
-    VIGEM_API VIGEM_ERROR vigem_target_ds4_await_output_report_timeout(
+    VIGEM_API VIGEM_ERROR vigem_target_DS5_await_output_report_timeout(
         PVIGEM_CLIENT vigem, 
         PVIGEM_TARGET target,
         DWORD milliseconds,
-        PDS4_OUTPUT_BUFFER buffer
+        PDS5_OUTPUT_BUFFER buffer
     );
 
     /**
@@ -608,10 +608,10 @@ extern "C" {
      *
      * @returns	A VIGEM_ERROR.
      */
-    VIGEM_API VIGEM_ERROR vigem_target_ds4_await_audio_data(
+    VIGEM_API VIGEM_ERROR vigem_target_DS5_await_audio_data(
         PVIGEM_CLIENT vigem, 
         PVIGEM_TARGET target, 
-        PDS4_AUDIO_BUFFER buffer
+        PDS5_AUDIO_BUFFER buffer
     );
 
     /**
@@ -625,11 +625,11 @@ extern "C" {
      *
      * @returns	A VIGEM_ERROR.
      */
-    VIGEM_API VIGEM_ERROR vigem_target_ds4_await_audio_data_timeout(
+    VIGEM_API VIGEM_ERROR vigem_target_DS5_await_audio_data_timeout(
         PVIGEM_CLIENT vigem, 
         PVIGEM_TARGET target,
         DWORD milliseconds,
-        PDS4_AUDIO_BUFFER buffer
+        PDS5_AUDIO_BUFFER buffer
     );
 
 #ifdef __cplusplus

@@ -35,9 +35,9 @@ typedef enum _VIGEM_TARGET_TYPE
     // 
     Xbox360Wired = 0,
     //
-    // Sony DualShock 4 (wired)
+    // Sony DualSense 5 (wired)
     // 
-    DualShock4Wired = 2, // NOTE: 1 skipped on purpose to maintain compatibility
+    DualSense5Wired = 2, // NOTE: 1 skipped on purpose to maintain compatibility
 
 } VIGEM_TARGET_TYPE, *PVIGEM_TARGET_TYPE;
 
@@ -90,9 +90,9 @@ VOID FORCEINLINE XUSB_REPORT_INIT(
 }
 
 //
-// The color value (RGB) of a DualShock 4 Lightbar
+// The color value (RGB) of a DualSense 5 Lightbar
 // 
-typedef struct _DS4_LIGHTBAR_COLOR
+typedef struct _DS5_LIGHTBAR_COLOR
 {
     //
     // Red part of the Lightbar (0-255).
@@ -109,81 +109,81 @@ typedef struct _DS4_LIGHTBAR_COLOR
     //
     UCHAR Blue;
 
-} DS4_LIGHTBAR_COLOR, *PDS4_LIGHTBAR_COLOR;
+} DS5_LIGHTBAR_COLOR, *PDS5_LIGHTBAR_COLOR;
 
 //
-// DualShock 4 digital buttons
+// DualSense 5 digital buttons
 // 
-typedef enum _DS4_BUTTONS
+typedef enum _DS5_BUTTONS
 {
-    DS4_BUTTON_THUMB_RIGHT      = 1 << 15,
-    DS4_BUTTON_THUMB_LEFT       = 1 << 14,
-    DS4_BUTTON_OPTIONS          = 1 << 13,
-    DS4_BUTTON_SHARE            = 1 << 12,
-    DS4_BUTTON_TRIGGER_RIGHT    = 1 << 11,
-    DS4_BUTTON_TRIGGER_LEFT     = 1 << 10,
-    DS4_BUTTON_SHOULDER_RIGHT   = 1 << 9,
-    DS4_BUTTON_SHOULDER_LEFT    = 1 << 8,
-    DS4_BUTTON_TRIANGLE         = 1 << 7,
-    DS4_BUTTON_CIRCLE           = 1 << 6,
-    DS4_BUTTON_CROSS            = 1 << 5,
-    DS4_BUTTON_SQUARE           = 1 << 4
+    DS5_BUTTON_THUMB_RIGHT      = 1 << 15,
+    DS5_BUTTON_THUMB_LEFT       = 1 << 14,
+    DS5_BUTTON_OPTIONS          = 1 << 13,
+    DS5_BUTTON_SHARE            = 1 << 12,
+    DS5_BUTTON_TRIGGER_RIGHT    = 1 << 11,
+    DS5_BUTTON_TRIGGER_LEFT     = 1 << 10,
+    DS5_BUTTON_SHOULDER_RIGHT   = 1 << 9,
+    DS5_BUTTON_SHOULDER_LEFT    = 1 << 8,
+    DS5_BUTTON_TRIANGLE         = 1 << 7,
+    DS5_BUTTON_CIRCLE           = 1 << 6,
+    DS5_BUTTON_CROSS            = 1 << 5,
+    DS5_BUTTON_SQUARE           = 1 << 4
 
-} DS4_BUTTONS, *PDS4_BUTTONS;
+} DS5_BUTTONS, *PDS5_BUTTONS;
 
 //
-// DualShock 4 special buttons
+// DualSense 5 special buttons
 // 
-typedef enum _DS4_SPECIAL_BUTTONS
+typedef enum _DS5_SPECIAL_BUTTONS
 {
-    DS4_SPECIAL_BUTTON_PS           = 1 << 0,
-    DS4_SPECIAL_BUTTON_TOUCHPAD     = 1 << 1
+    DS5_SPECIAL_BUTTON_PS           = 1 << 0,
+    DS5_SPECIAL_BUTTON_TOUCHPAD     = 1 << 1
 
-} DS4_SPECIAL_BUTTONS, *PDS4_SPECIAL_BUTTONS;
+} DS5_SPECIAL_BUTTONS, *PDS5_SPECIAL_BUTTONS;
 
 //
-// DualShock 4 directional pad (HAT) values
+// DualSense 5 directional pad (HAT) values
 // 
-typedef enum _DS4_DPAD_DIRECTIONS
+typedef enum _DS5_DPAD_DIRECTIONS
 {
-    DS4_BUTTON_DPAD_NONE        = 0x8,
-    DS4_BUTTON_DPAD_NORTHWEST   = 0x7,
-    DS4_BUTTON_DPAD_WEST        = 0x6,
-    DS4_BUTTON_DPAD_SOUTHWEST   = 0x5,
-    DS4_BUTTON_DPAD_SOUTH       = 0x4,
-    DS4_BUTTON_DPAD_SOUTHEAST   = 0x3,
-    DS4_BUTTON_DPAD_EAST        = 0x2,
-    DS4_BUTTON_DPAD_NORTHEAST   = 0x1,
-    DS4_BUTTON_DPAD_NORTH       = 0x0
+    DS5_BUTTON_DPAD_NONE        = 0x8,
+    DS5_BUTTON_DPAD_NORTHWEST   = 0x7,
+    DS5_BUTTON_DPAD_WEST        = 0x6,
+    DS5_BUTTON_DPAD_SOUTHWEST   = 0x5,
+    DS5_BUTTON_DPAD_SOUTH       = 0x4,
+    DS5_BUTTON_DPAD_SOUTHEAST   = 0x3,
+    DS5_BUTTON_DPAD_EAST        = 0x2,
+    DS5_BUTTON_DPAD_NORTHEAST   = 0x1,
+    DS5_BUTTON_DPAD_NORTH       = 0x0
 
-} DS4_DPAD_DIRECTIONS, *PDS4_DPAD_DIRECTIONS;
+} DS5_DPAD_DIRECTIONS, *PDS5_DPAD_DIRECTIONS;
 
 #include <pshpack1.h> // pack structs tightly
 
 //
-// DualShock 4 HID Touch finger data (4 bytes)
+// DualSense 5 HID Touch finger data (4 bytes)
 //
-typedef struct _DS4_TOUCH_FINGER
+typedef struct _DS5_TOUCH_FINGER
 {
     /*0.0*/ ULONG Index : 7;
     /*0.7*/ ULONG NotTouching : 1;
     /*1.0*/ ULONG FingerX : 12;
     /*2.4*/ ULONG FingerY : 12;
-} DS4_TOUCH_FINGER, *PDS4_TOUCH_FINGER;
+} DS5_TOUCH_FINGER, *PDS5_TOUCH_FINGER;
 
 //
-// DualShock 4 HID Touchpad structure (9 bytes)
+// DualSense 5 HID Touchpad structure (9 bytes)
 //
-typedef struct _DS4_TOUCH
+typedef struct _DS5_TOUCH
 {
-    /*0*/ DS4_TOUCH_FINGER Finger[2];
+    /*0*/ DS5_TOUCH_FINGER Finger[2];
     /*8*/ BYTE bTimestamp;
-} DS4_TOUCH, *PDS4_TOUCH;
+} DS5_TOUCH, *PDS5_TOUCH;
 
 //
-// DualShock 4 HID Input report (USB Get State Data - 63 bytes)
+// DualSense 5 HID Input report (USB Get State Data - 63 bytes)
 //
-typedef struct _DS4_REPORT
+typedef struct _DS5_REPORT
 {
     /* 0  */ BYTE bThumbLX;
     /* 1  */ BYTE bThumbLY;
@@ -230,7 +230,7 @@ typedef struct _DS4_REPORT
     /*25  */ SHORT wAccelerometerZ;
     /*27  */ ULONG ulSensorTimestamp;
     /*31  */ CHAR bTemperature;            // reserved2 in Linux driver
-    /*32  */ DS4_TOUCH sCurrentTouch;      // 9 bytes touch data
+    /*32  */ DS5_TOUCH sCurrentTouch;      // 9 bytes touch data
 
     // Byte 41: trigger feedback
     /*41.0*/ BYTE TriggerRightStopLocation : 4; // range 0-9
@@ -269,53 +269,53 @@ typedef struct _DS4_REPORT
 
     /*55  */ BYTE bAesCmac[8];
 
-} DS4_REPORT, *PDS4_REPORT;
+} DS5_REPORT, *PDS5_REPORT;
 
 //
-// Sets the current state of the D-PAD on a DualShock 4 report.
+// Sets the current state of the D-PAD on a DualSense 5 report.
 // 
-VOID FORCEINLINE DS4_SET_DPAD(
-    _Out_ PDS4_REPORT Report,
-    _In_ DS4_DPAD_DIRECTIONS Dpad
+VOID FORCEINLINE DS5_SET_DPAD(
+    _Out_ PDS5_REPORT Report,
+    _In_ DS5_DPAD_DIRECTIONS Dpad
 )
 {
     Report->DPad = (BYTE)Dpad;
 }
 
-VOID FORCEINLINE DS4_REPORT_INIT(
-    _Out_ PDS4_REPORT Report
+VOID FORCEINLINE DS5_REPORT_INIT(
+    _Out_ PDS5_REPORT Report
 )
 {
-    RtlZeroMemory(Report, sizeof(DS4_REPORT));
+    RtlZeroMemory(Report, sizeof(DS5_REPORT));
 
     Report->bThumbLX = 0x80;
     Report->bThumbLY = 0x80;
     Report->bThumbRX = 0x80;
     Report->bThumbRY = 0x80;
 
-    DS4_SET_DPAD(Report, DS4_BUTTON_DPAD_NONE);
+    DS5_SET_DPAD(Report, DS5_BUTTON_DPAD_NONE);
 }
 
-typedef struct _DS4_OUTPUT_BUFFER
+typedef struct _DS5_OUTPUT_BUFFER
 {
 	//
 	// The output report buffer
 	// 
 	_Out_ UCHAR Buffer[64];
 	
-} DS4_OUTPUT_BUFFER, *PDS4_OUTPUT_BUFFER;
+} DS5_OUTPUT_BUFFER, *PDS5_OUTPUT_BUFFER;
 
 //
 // Maximum audio data size per buffer
 //
-#ifndef DS4_AUDIO_DATA_MAX_SIZE
-#define DS4_AUDIO_DATA_MAX_SIZE 4096
+#ifndef DS5_AUDIO_DATA_MAX_SIZE
+#define DS5_AUDIO_DATA_MAX_SIZE 4096
 #endif
 
 //
-// DualShock 4 audio data buffer for user-mode consumption
+// DualSense 5 audio data buffer for user-mode consumption
 //
-typedef struct _DS4_AUDIO_BUFFER
+typedef struct _DS5_AUDIO_BUFFER
 {
 	//
 	// Actual audio data length in bytes
@@ -325,8 +325,8 @@ typedef struct _DS4_AUDIO_BUFFER
 	//
 	// Audio data payload
 	//
-	_Out_ UCHAR AudioData[DS4_AUDIO_DATA_MAX_SIZE];
+	_Out_ UCHAR AudioData[DS5_AUDIO_DATA_MAX_SIZE];
 
-} DS4_AUDIO_BUFFER, *PDS4_AUDIO_BUFFER;
+} DS5_AUDIO_BUFFER, *PDS5_AUDIO_BUFFER;
 
 #include <poppack.h>

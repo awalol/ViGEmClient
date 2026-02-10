@@ -66,13 +66,13 @@ DEFINE_GUID(GUID_DEVINTERFACE_BUSENUM_VIGEM,
 
 #define IOCTL_XUSB_REQUEST_NOTIFICATION     BUSENUM_RW_IOCTL(IOCTL_VIGEM_BASE + 0x200)
 #define IOCTL_XUSB_SUBMIT_REPORT            BUSENUM_W_IOCTL (IOCTL_VIGEM_BASE + 0x201)
-#define IOCTL_DS4_SUBMIT_REPORT             BUSENUM_W_IOCTL (IOCTL_VIGEM_BASE + 0x202)
-#define IOCTL_DS4_REQUEST_NOTIFICATION      BUSENUM_W_IOCTL (IOCTL_VIGEM_BASE + 0x203)
+#define IOCTL_DS5_SUBMIT_REPORT             BUSENUM_W_IOCTL (IOCTL_VIGEM_BASE + 0x202)
+#define IOCTL_DS5_REQUEST_NOTIFICATION      BUSENUM_W_IOCTL (IOCTL_VIGEM_BASE + 0x203)
 //#define IOCTL_XGIP_SUBMIT_REPORT        BUSENUM_W_IOCTL (IOCTL_VIGEM_BASE + 0x204)
 //#define IOCTL_XGIP_SUBMIT_INTERRUPT     BUSENUM_W_IOCTL (IOCTL_VIGEM_BASE + 0x205)
 #define IOCTL_XUSB_GET_USER_INDEX           BUSENUM_RW_IOCTL(IOCTL_VIGEM_BASE + 0x206)
-#define IOCTL_DS4_AWAIT_OUTPUT_AVAILABLE    BUSENUM_RW_IOCTL(IOCTL_VIGEM_BASE + 0x207)
-#define IOCTL_DS4_AWAIT_AUDIO_DATA          BUSENUM_RW_IOCTL(IOCTL_VIGEM_BASE + 0x208)
+#define IOCTL_DS5_AWAIT_OUTPUT_AVAILABLE    BUSENUM_RW_IOCTL(IOCTL_VIGEM_BASE + 0x207)
+#define IOCTL_DS5_AWAIT_AUDIO_DATA          BUSENUM_RW_IOCTL(IOCTL_VIGEM_BASE + 0x208)
 
 
 //
@@ -331,9 +331,9 @@ VOID FORCEINLINE XUSB_GET_USER_INDEX_INIT(
 
 #pragma endregion
 
-#pragma region DualShock 4 section
+#pragma region DualSense 5 section
 
-typedef struct _DS4_OUTPUT_REPORT
+typedef struct _DS5_OUTPUT_REPORT
 {
     //
     // Vibration intensity value of the small motor (0-255).
@@ -348,14 +348,14 @@ typedef struct _DS4_OUTPUT_REPORT
     //
     // Color values of the Lightbar.
     //
-    DS4_LIGHTBAR_COLOR LightbarColor;
+    DS5_LIGHTBAR_COLOR LightbarColor;
 
-} DS4_OUTPUT_REPORT, *PDS4_OUTPUT_REPORT;
+} DS5_OUTPUT_REPORT, *PDS5_OUTPUT_REPORT;
 
 //
-// Data structure used in IOCTL_DS4_REQUEST_NOTIFICATION requests.
+// Data structure used in IOCTL_DS5_REQUEST_NOTIFICATION requests.
 // 
-typedef struct _DS4_REQUEST_NOTIFICATION
+typedef struct _DS5_REQUEST_NOTIFICATION
 {
     //
     // sizeof(struct _XUSB_REQUEST_NOTIFICATION)
@@ -370,31 +370,31 @@ typedef struct _DS4_REQUEST_NOTIFICATION
     //
     // The HID output report
     // 
-    DS4_OUTPUT_REPORT Report;
+    DS5_OUTPUT_REPORT Report;
 
-} DS4_REQUEST_NOTIFICATION, *PDS4_REQUEST_NOTIFICATION;
+} DS5_REQUEST_NOTIFICATION, *PDS5_REQUEST_NOTIFICATION;
 
 //
-// Initializes a DS4_REQUEST_NOTIFICATION structure.
+// Initializes a DS5_REQUEST_NOTIFICATION structure.
 // 
-VOID FORCEINLINE DS4_REQUEST_NOTIFICATION_INIT(
-    _Out_ PDS4_REQUEST_NOTIFICATION Request,
+VOID FORCEINLINE DS5_REQUEST_NOTIFICATION_INIT(
+    _Out_ PDS5_REQUEST_NOTIFICATION Request,
     _In_ ULONG SerialNo
 )
 {
-    RtlZeroMemory(Request, sizeof(DS4_REQUEST_NOTIFICATION));
+    RtlZeroMemory(Request, sizeof(DS5_REQUEST_NOTIFICATION));
 
-    Request->Size = sizeof(DS4_REQUEST_NOTIFICATION);
+    Request->Size = sizeof(DS5_REQUEST_NOTIFICATION);
     Request->SerialNo = SerialNo;
 }
 
 //
-// DualShock 4 request data
+// DualSense 5 request data
 // 
-typedef struct _DS4_SUBMIT_REPORT
+typedef struct _DS5_SUBMIT_REPORT
 {
     //
-    // sizeof(struct _DS4_SUBMIT_REPORT)
+    // sizeof(struct _DS5_SUBMIT_REPORT)
     // 
     ULONG Size;
 
@@ -406,36 +406,36 @@ typedef struct _DS4_SUBMIT_REPORT
     //
     // HID Input report
     // 
-    DS4_REPORT Report;
+    DS5_REPORT Report;
 
-} DS4_SUBMIT_REPORT, *PDS4_SUBMIT_REPORT;
+} DS5_SUBMIT_REPORT, *PDS5_SUBMIT_REPORT;
 
 //
-// Initializes a DualShock 4 report.
+// Initializes a DualSense 5 report.
 // 
-VOID FORCEINLINE DS4_SUBMIT_REPORT_INIT(
-    _Out_ PDS4_SUBMIT_REPORT Report,
+VOID FORCEINLINE DS5_SUBMIT_REPORT_INIT(
+    _Out_ PDS5_SUBMIT_REPORT Report,
     _In_ ULONG SerialNo
 )
 {
-    RtlZeroMemory(Report, sizeof(DS4_SUBMIT_REPORT));
+    RtlZeroMemory(Report, sizeof(DS5_SUBMIT_REPORT));
 
-    Report->Size = sizeof(DS4_SUBMIT_REPORT);
+    Report->Size = sizeof(DS5_SUBMIT_REPORT);
     Report->SerialNo = SerialNo;
 
-    DS4_REPORT_INIT(&Report->Report);
+    DS5_REPORT_INIT(&Report->Report);
 }
 
 #pragma endregion
 
-#pragma region DS4 Await Output
+#pragma region DS5 Await Output
 
 #include <pshpack1.h>
 
-typedef struct _DS4_AWAIT_OUTPUT
+typedef struct _DS5_AWAIT_OUTPUT
 {
 	//
-	// sizeof(struct _DS4_AWAIT_OUTPUT)
+	// sizeof(struct _DS5_AWAIT_OUTPUT)
 	// 
 	_In_ ULONG Size;
 
@@ -447,40 +447,40 @@ typedef struct _DS4_AWAIT_OUTPUT
     //
     // The payload
     // 
-    _Out_ DS4_OUTPUT_BUFFER Report;
+    _Out_ DS5_OUTPUT_BUFFER Report;
     
-} DS4_AWAIT_OUTPUT, * PDS4_AWAIT_OUTPUT;
+} DS5_AWAIT_OUTPUT, * PDS5_AWAIT_OUTPUT;
 
 #include <poppack.h>
 
-VOID FORCEINLINE DS4_AWAIT_OUTPUT_INIT(
-	_Out_ PDS4_AWAIT_OUTPUT Output,
+VOID FORCEINLINE DS5_AWAIT_OUTPUT_INIT(
+	_Out_ PDS5_AWAIT_OUTPUT Output,
     _In_ ULONG SerialNo
 )
 {
-	RtlZeroMemory(Output, sizeof(DS4_AWAIT_OUTPUT));
+	RtlZeroMemory(Output, sizeof(DS5_AWAIT_OUTPUT));
 
-	Output->Size = sizeof(DS4_AWAIT_OUTPUT);
+	Output->Size = sizeof(DS5_AWAIT_OUTPUT);
     Output->SerialNo = SerialNo;
 }
 
 #pragma endregion
 
-#pragma region DS4 Await Audio Data
+#pragma region DS5 Await Audio Data
 
 //
 // Maximum audio data size per notification (covers typical ISO URB payload)
 //
-#ifndef DS4_AUDIO_DATA_MAX_SIZE
-#define DS4_AUDIO_DATA_MAX_SIZE 4096
+#ifndef DS5_AUDIO_DATA_MAX_SIZE
+#define DS5_AUDIO_DATA_MAX_SIZE 4096
 #endif
 
 #include <pshpack1.h>
 
-typedef struct _DS4_AUDIO_DATA
+typedef struct _DS5_AUDIO_DATA
 {
 	//
-	// sizeof(struct _DS4_AUDIO_DATA)
+	// sizeof(struct _DS5_AUDIO_DATA)
 	//
 	_In_ ULONG Size;
 
@@ -497,20 +497,20 @@ typedef struct _DS4_AUDIO_DATA
 	//
 	// Audio data payload
 	//
-	_Out_ UCHAR AudioData[DS4_AUDIO_DATA_MAX_SIZE];
+	_Out_ UCHAR AudioData[DS5_AUDIO_DATA_MAX_SIZE];
 
-} DS4_AUDIO_DATA, * PDS4_AUDIO_DATA;
+} DS5_AUDIO_DATA, * PDS5_AUDIO_DATA;
 
 #include <poppack.h>
 
-VOID FORCEINLINE DS4_AUDIO_DATA_INIT(
-	_Out_ PDS4_AUDIO_DATA AudioData,
+VOID FORCEINLINE DS5_AUDIO_DATA_INIT(
+	_Out_ PDS5_AUDIO_DATA AudioData,
 	_In_ ULONG SerialNo
 )
 {
-	RtlZeroMemory(AudioData, sizeof(DS4_AUDIO_DATA));
+	RtlZeroMemory(AudioData, sizeof(DS5_AUDIO_DATA));
 
-	AudioData->Size = sizeof(DS4_AUDIO_DATA);
+	AudioData->Size = sizeof(DS5_AUDIO_DATA);
 	AudioData->SerialNo = SerialNo;
 }
 

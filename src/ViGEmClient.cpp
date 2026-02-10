@@ -126,21 +126,21 @@ PVIGEM_TARGET FORCEINLINE VIGEM_TARGET_ALLOC_INIT(
 	return target;
 }
 
-static DWORD WINAPI vigem_internal_ds4_output_report_pickup_handler(LPVOID Parameter)
+static DWORD WINAPI vigem_internal_DS5_output_report_pickup_handler(LPVOID Parameter)
 {
 	const PVIGEM_CLIENT pClient = (PVIGEM_CLIENT)Parameter;
-	DS4_AWAIT_OUTPUT await;
+	DS5_AWAIT_OUTPUT await;
 	DEVICE_IO_CONTROL_BEGIN;
 
-	DBGPRINT(L"Started DS4 Output Report pickup thread for 0x%p", pClient);
+	DBGPRINT(L"Started DS5 Output Report pickup thread for 0x%p", pClient);
 
 	do
 	{
-		DS4_AWAIT_OUTPUT_INIT(&await, 0);
+		DS5_AWAIT_OUTPUT_INIT(&await, 0);
 
 		DeviceIoControl(
 			pClient->hBusDevice,
-			IOCTL_DS4_AWAIT_OUTPUT_AVAILABLE,
+			IOCTL_DS5_AWAIT_OUTPUT_AVAILABLE,
 			&await,
 			await.Size,
 			&await,
@@ -159,8 +159,8 @@ static DWORD WINAPI vigem_internal_ds4_output_report_pickup_handler(LPVOID Param
 #if defined(VIGEM_VERBOSE_LOGGING_ENABLED)
 		DBGPRINT(L"Dumping buffer for %d", await.SerialNo);
 
-		const PCHAR dumpBuffer = (PCHAR)calloc(sizeof(DS4_OUTPUT_BUFFER), 3);
-		to_hex(await.Report.Buffer, sizeof(DS4_OUTPUT_BUFFER), dumpBuffer, sizeof(DS4_OUTPUT_BUFFER) * 3);
+		const PCHAR dumpBuffer = (PCHAR)calloc(sizeof(DS5_OUTPUT_BUFFER), 3);
+		to_hex(await.Report.Buffer, sizeof(DS5_OUTPUT_BUFFER), dumpBuffer, sizeof(DS5_OUTPUT_BUFFER) * 3);
 		OutputDebugStringA(dumpBuffer);
 #endif
 
@@ -168,38 +168,38 @@ static DWORD WINAPI vigem_internal_ds4_output_report_pickup_handler(LPVOID Param
 
 		if (pTarget)
 		{
-			memcpy(&pTarget->Ds4CachedOutputReport, &await.Report, sizeof(DS4_OUTPUT_BUFFER));
-			SetEvent(pTarget->Ds4CachedOutputReportUpdateAvailable);
+			memcpy(&pTarget->Ds5CachedOutputReport, &await.Report, sizeof(DS5_OUTPUT_BUFFER));
+			SetEvent(pTarget->Ds5CachedOutputReportUpdateAvailable);
 		}
 		else
 		{
 			DBGPRINT(L"No target to report to for serial %d", await.SerialNo);
 		}
 
-	} while (WaitForSingleObjectEx(pClient->hDS4OutputReportPickupThreadAbortEvent, 0, FALSE) == WAIT_TIMEOUT);
+	} while (WaitForSingleObjectEx(pClient->hDS5OutputReportPickupThreadAbortEvent, 0, FALSE) == WAIT_TIMEOUT);
 
 	DEVICE_IO_CONTROL_END;
 
-	DBGPRINT(L"Finished DS4 Output Report pickup thread for 0x%p", pClient);
+	DBGPRINT(L"Finished DS5 Output Report pickup thread for 0x%p", pClient);
 
 	return 0;
 }
 
-static DWORD WINAPI vigem_internal_ds4_audio_pickup_handler(LPVOID Parameter)
+static DWORD WINAPI vigem_internal_DS5_audio_pickup_handler(LPVOID Parameter)
 {
 	const PVIGEM_CLIENT pClient = (PVIGEM_CLIENT)Parameter;
-	DS4_AUDIO_DATA audioData;
+	DS5_AUDIO_DATA audioData;
 	DEVICE_IO_CONTROL_BEGIN;
 
-	DBGPRINT(L"Started DS4 Audio pickup thread for 0x%p", pClient);
+	DBGPRINT(L"Started DS5 Audio pickup thread for 0x%p", pClient);
 
 	do
 	{
-		DS4_AUDIO_DATA_INIT(&audioData, 0);
+		DS5_AUDIO_DATA_INIT(&audioData, 0);
 
 		DeviceIoControl(
 			pClient->hBusDevice,
-			IOCTL_DS4_AWAIT_AUDIO_DATA,
+			IOCTL_DS5_AWAIT_AUDIO_DATA,
 			&audioData,
 			audioData.Size,
 			&audioData,
@@ -218,20 +218,20 @@ static DWORD WINAPI vigem_internal_ds4_audio_pickup_handler(LPVOID Parameter)
 
 		if (pTarget)
 		{
-			pTarget->Ds4CachedAudioData.AudioDataLength = audioData.AudioDataLength;
-			memcpy(pTarget->Ds4CachedAudioData.AudioData, audioData.AudioData, audioData.AudioDataLength);
-			SetEvent(pTarget->Ds4CachedAudioDataUpdateAvailable);
+			pTarget->Ds5CachedAudioData.AudioDataLength = audioData.AudioDataLength;
+			memcpy(pTarget->Ds5CachedAudioData.AudioData, audioData.AudioData, audioData.AudioDataLength);
+			SetEvent(pTarget->Ds5CachedAudioDataUpdateAvailable);
 		}
 		else
 		{
 			DBGPRINT(L"No target to report audio to for serial %d", audioData.SerialNo);
 		}
 
-	} while (WaitForSingleObjectEx(pClient->hDS4AudioPickupThreadAbortEvent, 0, FALSE) == WAIT_TIMEOUT);
+	} while (WaitForSingleObjectEx(pClient->hDS5AudioPickupThreadAbortEvent, 0, FALSE) == WAIT_TIMEOUT);
 
 	DEVICE_IO_CONTROL_END;
 
-	DBGPRINT(L"Finished DS4 Audio pickup thread for 0x%p", pClient);
+	DBGPRINT(L"Finished DS5 Audio pickup thread for 0x%p", pClient);
 
 	return 0;
 }
@@ -245,8 +245,8 @@ PVIGEM_CLIENT vigem_alloc()
 
 	RtlZeroMemory(driver, sizeof(VIGEM_CLIENT));
 	driver->hBusDevice = INVALID_HANDLE_VALUE;
-	driver->hDS4OutputReportPickupThreadAbortEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-	driver->hDS4AudioPickupThreadAbortEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	driver->hDS5OutputReportPickupThreadAbortEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	driver->hDS5AudioPickupThreadAbortEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 
 	return driver;
 }
@@ -354,19 +354,19 @@ VIGEM_ERROR vigem_connect(PVIGEM_CLIENT vigem)
 		// wait for result
 		if (GetOverlappedResult(vigem->hBusDevice, &lOverlapped, &transferred, TRUE) != 0)
 		{
-		vigem->hDS4OutputReportPickupThread = CreateThread(
+		vigem->hDS5OutputReportPickupThread = CreateThread(
 				NULL,
 				0,
-				vigem_internal_ds4_output_report_pickup_handler,
+				vigem_internal_DS5_output_report_pickup_handler,
 				vigem,
 				0,
 				NULL
 			);
 
-			vigem->hDS4AudioPickupThread = CreateThread(
+			vigem->hDS5AudioPickupThread = CreateThread(
 				NULL,
 				0,
-				vigem_internal_ds4_audio_pickup_handler,
+				vigem_internal_DS5_audio_pickup_handler,
 				vigem,
 				0,
 				NULL
@@ -394,24 +394,24 @@ void vigem_disconnect(PVIGEM_CLIENT vigem)
 	if (!vigem)
 		return;
 
-	if (vigem->hDS4OutputReportPickupThread && vigem->hDS4OutputReportPickupThreadAbortEvent)
+	if (vigem->hDS5OutputReportPickupThread && vigem->hDS5OutputReportPickupThreadAbortEvent)
 	{
-		DBGPRINT(L"Awaiting DS4 thread clean-up for 0x%p", vigem);
+		DBGPRINT(L"Awaiting DS5 thread clean-up for 0x%p", vigem);
 
-		SetEvent(vigem->hDS4OutputReportPickupThreadAbortEvent);
-		WaitForSingleObject(vigem->hDS4OutputReportPickupThread, INFINITE);
-		CloseHandle(vigem->hDS4OutputReportPickupThread);
-		CloseHandle(vigem->hDS4OutputReportPickupThreadAbortEvent);
+		SetEvent(vigem->hDS5OutputReportPickupThreadAbortEvent);
+		WaitForSingleObject(vigem->hDS5OutputReportPickupThread, INFINITE);
+		CloseHandle(vigem->hDS5OutputReportPickupThread);
+		CloseHandle(vigem->hDS5OutputReportPickupThreadAbortEvent);
 	}
 
-	if (vigem->hDS4AudioPickupThread && vigem->hDS4AudioPickupThreadAbortEvent)
+	if (vigem->hDS5AudioPickupThread && vigem->hDS5AudioPickupThreadAbortEvent)
 	{
-		DBGPRINT(L"Awaiting DS4 Audio thread clean-up for 0x%p", vigem);
+		DBGPRINT(L"Awaiting DS5 Audio thread clean-up for 0x%p", vigem);
 
-		SetEvent(vigem->hDS4AudioPickupThreadAbortEvent);
-		WaitForSingleObject(vigem->hDS4AudioPickupThread, INFINITE);
-		CloseHandle(vigem->hDS4AudioPickupThread);
-		CloseHandle(vigem->hDS4AudioPickupThreadAbortEvent);
+		SetEvent(vigem->hDS5AudioPickupThreadAbortEvent);
+		WaitForSingleObject(vigem->hDS5AudioPickupThread, INFINITE);
+		CloseHandle(vigem->hDS5AudioPickupThread);
+		CloseHandle(vigem->hDS5AudioPickupThreadAbortEvent);
 	}
 
 	if (vigem->hBusDevice != INVALID_HANDLE_VALUE)
@@ -451,17 +451,17 @@ PVIGEM_TARGET vigem_target_x360_alloc(void)
 	return target;
 }
 
-PVIGEM_TARGET vigem_target_ds4_alloc(void)
+PVIGEM_TARGET vigem_target_DS5_alloc(void)
 {
-	const auto target = VIGEM_TARGET_ALLOC_INIT(DualShock4Wired);
+	const auto target = VIGEM_TARGET_ALLOC_INIT(DualSense5Wired);
 
 	if (!target)
 		return nullptr;
 
 	target->VendorId = 0x054C;
 	target->ProductId = 0x0CE6;
-	target->Ds4CachedOutputReportUpdateAvailable = CreateEvent(NULL, FALSE, FALSE, NULL);
-	target->Ds4CachedAudioDataUpdateAvailable = CreateEvent(NULL, FALSE, FALSE, NULL);
+	target->Ds5CachedOutputReportUpdateAvailable = CreateEvent(NULL, FALSE, FALSE, NULL);
+	target->Ds5CachedAudioDataUpdateAvailable = CreateEvent(NULL, FALSE, FALSE, NULL);
 
 	return target;
 }
@@ -537,7 +537,7 @@ VIGEM_ERROR vigem_target_add(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
 			 * perfect and can cause other functions to fail if called too soon but
 			 * hopefully the applications will just ignore these errors and retry ;)
 			 */
-			// 功能：通知 ViGEm 总线驱动创建并注册一个虚拟 HID 设备（如 Xbox 360 或 DS4 控制器）。
+			// 功能：通知 ViGEm 总线驱动创建并注册一个虚拟 HID 设备（如 Xbox 360 或 DS5 控制器）。
 			DeviceIoControl(
 				vigem->hBusDevice,
 				IOCTL_VIGEM_PLUGIN_TARGET,
@@ -689,14 +689,14 @@ VIGEM_ERROR vigem_target_remove(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
 
 	if (GetOverlappedResult(vigem->hBusDevice, &lOverlapped, &transferred, TRUE) != 0)
 	{
-		if (target->Ds4CachedOutputReportUpdateAvailable)
+		if (target->Ds5CachedOutputReportUpdateAvailable)
 		{
-			CloseHandle(target->Ds4CachedOutputReportUpdateAvailable);
+			CloseHandle(target->Ds5CachedOutputReportUpdateAvailable);
 		}
 
-		if (target->Ds4CachedAudioDataUpdateAvailable)
+		if (target->Ds5CachedAudioDataUpdateAvailable)
 		{
-			CloseHandle(target->Ds4CachedAudioDataUpdateAvailable);
+			CloseHandle(target->Ds5CachedAudioDataUpdateAvailable);
 		}
 
 		vigem->pTargetsList[target->SerialNo] = NULL;
@@ -801,10 +801,10 @@ VIGEM_ERROR vigem_target_x360_register_notification(
 	return VIGEM_ERROR_NONE;
 }
 
-VIGEM_ERROR vigem_target_ds4_register_notification(
+VIGEM_ERROR vigem_target_DS5_register_notification(
 	PVIGEM_CLIENT vigem,
 	PVIGEM_TARGET target,
-	PFN_VIGEM_DS4_NOTIFICATION notification,
+	PFN_VIGEM_DS5_NOTIFICATION notification,
 	LPVOID userData
 )
 {
@@ -844,18 +844,18 @@ VIGEM_ERROR vigem_target_ds4_register_notification(
 		{
 			DEVICE_IO_CONTROL_BEGIN;
 
-			DS4_REQUEST_NOTIFICATION ds4rn;
-			DS4_REQUEST_NOTIFICATION_INIT(&ds4rn, _Target->SerialNo);
+			DS5_REQUEST_NOTIFICATION ds5rn;
+			DS5_REQUEST_NOTIFICATION_INIT(&ds5rn, _Target->SerialNo);
 
 			do
 			{
 				DeviceIoControl(
 					_Client->hBusDevice,
-					IOCTL_DS4_REQUEST_NOTIFICATION,
-					&ds4rn,
-					ds4rn.Size,
-					&ds4rn,
-					ds4rn.Size,
+					IOCTL_DS5_REQUEST_NOTIFICATION,
+					&ds5rn,
+					ds5rn.Size,
+					&ds5rn,
+					ds5rn.Size,
 					&transferred,
 					&lOverlapped
 				);
@@ -868,10 +868,10 @@ VIGEM_ERROR vigem_target_ds4_register_notification(
 						return;
 					}
 
-					reinterpret_cast<PFN_VIGEM_DS4_NOTIFICATION>(_Target->Notification)(
-						_Client, _Target, ds4rn.Report.LargeMotor,
-						ds4rn.Report.SmallMotor,
-						ds4rn.Report.LightbarColor, _UserData
+					reinterpret_cast<PFN_VIGEM_DS5_NOTIFICATION>(_Target->Notification)(
+						_Client, _Target, ds5rn.Report.LargeMotor,
+						ds5rn.Report.SmallMotor,
+						ds5rn.Report.LightbarColor, _UserData
 					);
 
 					continue;
@@ -907,9 +907,9 @@ void vigem_target_x360_unregister_notification(PVIGEM_TARGET target)
 	target->NotificationUserData = nullptr;
 }
 
-void vigem_target_ds4_unregister_notification(PVIGEM_TARGET target)
+void vigem_target_DS5_unregister_notification(PVIGEM_TARGET target)
 {
-	vigem_target_x360_unregister_notification(target); // The same x360_unregister handler works for DS4_unregister also
+	vigem_target_x360_unregister_notification(target); // The same x360_unregister handler works for DS5_unregister also
 }
 
 void vigem_target_set_vid(PVIGEM_TARGET target, USHORT vid)
@@ -982,10 +982,10 @@ VIGEM_ERROR vigem_target_x360_update(
 	return VIGEM_ERROR_NONE;
 }
 
-VIGEM_ERROR vigem_target_ds4_update(
+VIGEM_ERROR vigem_target_DS5_update(
 	PVIGEM_CLIENT vigem,
 	PVIGEM_TARGET target,
-	DS4_REPORT report
+	DS5_REPORT report
 )
 {
 	if (!vigem)
@@ -1002,14 +1002,14 @@ VIGEM_ERROR vigem_target_ds4_update(
 
 	DEVICE_IO_CONTROL_BEGIN;
 
-	DS4_SUBMIT_REPORT dsr;
-	DS4_SUBMIT_REPORT_INIT(&dsr, target->SerialNo);
+	DS5_SUBMIT_REPORT dsr;
+	DS5_SUBMIT_REPORT_INIT(&dsr, target->SerialNo);
 
 	dsr.Report = report;
 
 	DeviceIoControl(
 		vigem->hBusDevice,
-		IOCTL_DS4_SUBMIT_REPORT,
+		IOCTL_DS5_SUBMIT_REPORT,
 		&dsr,
 		dsr.Size,
 		nullptr,
@@ -1034,8 +1034,8 @@ VIGEM_ERROR vigem_target_ds4_update(
 
 
 
-// vigem_target_ds4_update_ex removed: DS4_REPORT is now the full 63-byte report,
-// use vigem_target_ds4_update instead.
+// vigem_target_DS5_update_ex removed: DS5_REPORT is now the full 63-byte report,
+// use vigem_target_DS5_update instead.
 
 ULONG vigem_target_get_index(PVIGEM_TARGET target)
 {
@@ -1113,20 +1113,20 @@ VIGEM_ERROR vigem_target_x360_get_user_index(
 	return VIGEM_ERROR_NONE;
 }
 
-VIGEM_ERROR vigem_target_ds4_await_output_report(
+VIGEM_ERROR vigem_target_DS5_await_output_report(
 	PVIGEM_CLIENT vigem,
 	PVIGEM_TARGET target,
-	PDS4_OUTPUT_BUFFER buffer
+	PDS5_OUTPUT_BUFFER buffer
 )
 {
-	return vigem_target_ds4_await_output_report_timeout(vigem, target, INFINITE, buffer);
+	return vigem_target_DS5_await_output_report_timeout(vigem, target, INFINITE, buffer);
 }
 
-VIGEM_ERROR vigem_target_ds4_await_output_report_timeout(
+VIGEM_ERROR vigem_target_DS5_await_output_report_timeout(
 	PVIGEM_CLIENT vigem,
 	PVIGEM_TARGET target,
 	DWORD milliseconds,
-	PDS4_OUTPUT_BUFFER buffer
+	PDS5_OUTPUT_BUFFER buffer
 )
 {
 	if (!vigem)
@@ -1144,7 +1144,7 @@ VIGEM_ERROR vigem_target_ds4_await_output_report_timeout(
 	if (!buffer)
 		return VIGEM_ERROR_INVALID_PARAMETER;
 
-	const DWORD status = WaitForSingleObject(target->Ds4CachedOutputReportUpdateAvailable, milliseconds);
+	const DWORD status = WaitForSingleObject(target->Ds5CachedOutputReportUpdateAvailable, milliseconds);
 
 	if (status == WAIT_TIMEOUT)
 	{
@@ -1154,30 +1154,30 @@ VIGEM_ERROR vigem_target_ds4_await_output_report_timeout(
 #if defined(VIGEM_VERBOSE_LOGGING_ENABLED)
 	DBGPRINT(L"Dumping buffer for %d", target->SerialNo);
 
-	const PCHAR dumpBuffer = (PCHAR)calloc(sizeof(DS4_OUTPUT_BUFFER), 3);
-	to_hex(target->Ds4CachedOutputReport.Buffer, sizeof(DS4_OUTPUT_BUFFER), dumpBuffer, sizeof(DS4_OUTPUT_BUFFER) * 3);
+	const PCHAR dumpBuffer = (PCHAR)calloc(sizeof(DS5_OUTPUT_BUFFER), 3);
+	to_hex(target->Ds5CachedOutputReport.Buffer, sizeof(DS5_OUTPUT_BUFFER), dumpBuffer, sizeof(DS5_OUTPUT_BUFFER) * 3);
 	OutputDebugStringA(dumpBuffer);
 #endif
 
-	RtlCopyMemory(buffer, &target->Ds4CachedOutputReport, sizeof(DS4_OUTPUT_BUFFER));
+	RtlCopyMemory(buffer, &target->Ds5CachedOutputReport, sizeof(DS5_OUTPUT_BUFFER));
 
 	return VIGEM_ERROR_NONE;
 }
 
-VIGEM_ERROR vigem_target_ds4_await_audio_data(
+VIGEM_ERROR vigem_target_DS5_await_audio_data(
 	PVIGEM_CLIENT vigem,
 	PVIGEM_TARGET target,
-	PDS4_AUDIO_BUFFER buffer
+	PDS5_AUDIO_BUFFER buffer
 )
 {
-	return vigem_target_ds4_await_audio_data_timeout(vigem, target, INFINITE, buffer);
+	return vigem_target_DS5_await_audio_data_timeout(vigem, target, INFINITE, buffer);
 }
 
-VIGEM_ERROR vigem_target_ds4_await_audio_data_timeout(
+VIGEM_ERROR vigem_target_DS5_await_audio_data_timeout(
 	PVIGEM_CLIENT vigem,
 	PVIGEM_TARGET target,
 	DWORD milliseconds,
-	PDS4_AUDIO_BUFFER buffer
+	PDS5_AUDIO_BUFFER buffer
 )
 {
 	if (!vigem)
@@ -1195,15 +1195,15 @@ VIGEM_ERROR vigem_target_ds4_await_audio_data_timeout(
 	if (!buffer)
 		return VIGEM_ERROR_INVALID_PARAMETER;
 
-	const DWORD status = WaitForSingleObject(target->Ds4CachedAudioDataUpdateAvailable, milliseconds);
+	const DWORD status = WaitForSingleObject(target->Ds5CachedAudioDataUpdateAvailable, milliseconds);
 
 	if (status == WAIT_TIMEOUT)
 	{
 		return VIGEM_ERROR_TIMED_OUT;
 	}
 
-	buffer->AudioDataLength = target->Ds4CachedAudioData.AudioDataLength;
-	RtlCopyMemory(buffer->AudioData, target->Ds4CachedAudioData.AudioData, target->Ds4CachedAudioData.AudioDataLength);
+	buffer->AudioDataLength = target->Ds5CachedAudioData.AudioDataLength;
+	RtlCopyMemory(buffer->AudioData, target->Ds5CachedAudioData.AudioData, target->Ds5CachedAudioData.AudioDataLength);
 
 	return VIGEM_ERROR_NONE;
 }
