@@ -72,6 +72,9 @@ DEFINE_GUID(GUID_DEVINTERFACE_BUSENUM_VIGEM,
 //#define IOCTL_XGIP_SUBMIT_INTERRUPT     BUSENUM_W_IOCTL (IOCTL_VIGEM_BASE + 0x205)
 #define IOCTL_XUSB_GET_USER_INDEX           BUSENUM_RW_IOCTL(IOCTL_VIGEM_BASE + 0x206)
 #define IOCTL_DS4_AWAIT_OUTPUT_AVAILABLE    BUSENUM_RW_IOCTL(IOCTL_VIGEM_BASE + 0x207)
+#define IOCTL_DS5_SUBMIT_REPORT             BUSENUM_W_IOCTL (IOCTL_VIGEM_BASE + 0x208)
+#define IOCTL_DS5_REQUEST_NOTIFICATION      BUSENUM_W_IOCTL (IOCTL_VIGEM_BASE + 0x209)
+#define IOCTL_DS5_AWAIT_OUTPUT_AVAILABLE    BUSENUM_RW_IOCTL(IOCTL_VIGEM_BASE + 0x20A)
 
 
 //
@@ -500,6 +503,141 @@ VOID FORCEINLINE DS4_AWAIT_OUTPUT_INIT(
 	RtlZeroMemory(Output, sizeof(DS4_AWAIT_OUTPUT));
 
 	Output->Size = sizeof(DS4_AWAIT_OUTPUT);
+    Output->SerialNo = SerialNo;
+}
+
+#pragma endregion
+
+#pragma region DualSense 5 section
+
+//
+// DualSense 5 request data
+// 
+typedef struct _DS5_SUBMIT_REPORT
+{
+    //
+    // sizeof(struct _DS4_SUBMIT_REPORT)
+    // 
+    ULONG Size;
+
+    //
+    // Serial number of target device.
+    // 
+    ULONG SerialNo;
+
+    //
+    // HID Input report
+    // 
+    DS5_REPORT Report;
+
+} DS5_SUBMIT_REPORT, *PDS5_SUBMIT_REPORT;
+
+typedef struct _DS5_OUTPUT_REPORT
+{
+    //
+    // Vibration intensity value of the small motor (0-255).
+    // 
+    UCHAR SmallMotor;
+
+    //
+    // Vibration intensity value of the large motor (0-255).
+    // 
+    UCHAR LargeMotor;
+
+    //
+    // Color values of the Lightbar.
+    //
+    DS4_LIGHTBAR_COLOR LightbarColor;
+
+} DS5_OUTPUT_REPORT, *PDS5_OUTPUT_REPORT;
+
+//
+// Data structure used in IOCTL_DS5_REQUEST_NOTIFICATION requests.
+// 
+typedef struct _DS5_REQUEST_NOTIFICATION
+{
+    //
+    // sizeof(struct _XUSB_REQUEST_NOTIFICATION)
+    // 
+    ULONG Size;
+
+    //
+    // Serial number of target device.
+    // 
+    ULONG SerialNo;
+
+    //
+    // The HID output report
+    // 
+    DS5_OUTPUT_REPORT Report;
+
+} DS5_REQUEST_NOTIFICATION, *PDS5_REQUEST_NOTIFICATION;
+
+//
+// Initializes a DS4_REQUEST_NOTIFICATION structure.
+// 
+VOID FORCEINLINE DS5_REQUEST_NOTIFICATION_INIT(
+    _Out_ PDS5_REQUEST_NOTIFICATION Request,
+    _In_ ULONG SerialNo
+)
+{
+    RtlZeroMemory(Request, sizeof(DS5_REQUEST_NOTIFICATION));
+
+    Request->Size = sizeof(DS5_REQUEST_NOTIFICATION);
+    Request->SerialNo = SerialNo;
+}
+
+//
+// Initializes a DualSense 5 report.
+// 
+VOID FORCEINLINE DS5_SUBMIT_REPORT_INIT(
+    _Out_ PDS5_SUBMIT_REPORT Report,
+    _In_ ULONG SerialNo
+)
+{
+    RtlZeroMemory(Report, sizeof(DS5_SUBMIT_REPORT));
+
+    Report->Size = sizeof(DS5_SUBMIT_REPORT);
+    Report->SerialNo = SerialNo;
+
+    DS5_REPORT_INIT(&Report->Report);
+}
+
+#include <pshpack1.h>
+
+#pragma region DS5 Await Output
+
+#include <pshpack1.h>
+
+typedef struct _DS5_AWAIT_OUTPUT
+{
+    //
+    // sizeof(struct _DS4_AWAIT_OUTPUT)
+    // 
+    _In_ ULONG Size;
+
+    //
+    // Serial number of target device.
+    // 
+    _Inout_ ULONG SerialNo;
+
+    //
+    // The payload
+    // 
+    _Out_ DS5_OUTPUT_BUFFER Report;
+    
+} DS5_AWAIT_OUTPUT, * PDS5_AWAIT_OUTPUT;
+
+#include <poppack.h>
+
+VOID FORCEINLINE DS5_AWAIT_OUTPUT_INIT(
+    _Out_ PDS5_AWAIT_OUTPUT Output,
+    _In_ ULONG SerialNo
+)
+{
+    RtlZeroMemory(Output, sizeof(DS5_AWAIT_OUTPUT));
+
+    Output->Size = sizeof(DS5_AWAIT_OUTPUT);
     Output->SerialNo = SerialNo;
 }
 
