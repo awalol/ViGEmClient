@@ -154,6 +154,20 @@ extern "C" {
         );
 
     typedef EVT_VIGEM_DS4_NOTIFICATION *PFN_VIGEM_DS4_NOTIFICATION;
+    
+    typedef
+        _Function_class_(EVT_VIGEM_DS5_NOTIFICATION)
+        VOID CALLBACK
+        EVT_VIGEM_DS5_NOTIFICATION(
+            PVIGEM_CLIENT Client,
+            PVIGEM_TARGET Target,
+            UCHAR LargeMotor,
+            UCHAR SmallMotor,
+            DS4_LIGHTBAR_COLOR LightbarColor,
+            LPVOID UserData
+        );
+
+    typedef EVT_VIGEM_DS5_NOTIFICATION *PFN_VIGEM_DS5_NOTIFICATION;
 
     /**
      *  Allocates an object representing a driver connection

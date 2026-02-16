@@ -375,6 +375,17 @@ typedef struct _DS5_REPORT
 
 } DS5_REPORT, *PDS5_REPORT;
 
+typedef struct _DS5_OUTPUT_BUFFER
+{
+	//
+	// The output report buffer
+	// 
+	_Out_ UCHAR Buffer[64];
+	
+} DS5_OUTPUT_BUFFER, *PDS5_OUTPUT_BUFFER;
+
+#include <poppack.h>
+
 //
 // Sets the current state of the D-PAD on a DualSense 5 report.
 // 
@@ -399,14 +410,3 @@ VOID FORCEINLINE DS5_REPORT_INIT(
 
 	DS5_SET_DPAD(Report, DS4_BUTTON_DPAD_NONE);
 }
-
-typedef struct _DS5_OUTPUT_BUFFER
-{
-	//
-	// The output report buffer
-	// 
-	_Out_ UCHAR Buffer[64];
-	
-} DS5_OUTPUT_BUFFER, *PDS5_OUTPUT_BUFFER;
-
-#include <poppack.h>

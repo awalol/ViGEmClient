@@ -255,6 +255,7 @@ PVIGEM_CLIENT vigem_alloc()
 	RtlZeroMemory(driver, sizeof(VIGEM_CLIENT));
 	driver->hBusDevice = INVALID_HANDLE_VALUE;
 	driver->hDS4OutputReportPickupThreadAbortEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	driver->hDS5OutputReportPickupThreadAbortEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 
 	return driver;
 }
@@ -709,6 +710,10 @@ VIGEM_ERROR vigem_target_remove(PVIGEM_CLIENT vigem, PVIGEM_TARGET target)
 		if (target->Ds4CachedOutputReportUpdateAvailable)
 		{
 			CloseHandle(target->Ds4CachedOutputReportUpdateAvailable);
+		}
+		if (target->Ds5CachedOutputReportUpdateAvailable)
+		{
+			CloseHandle(target->Ds5CachedOutputReportUpdateAvailable);
 		}
 
 		vigem->pTargetsList[target->SerialNo] = NULL;

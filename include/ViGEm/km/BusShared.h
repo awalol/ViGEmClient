@@ -603,7 +603,7 @@ VOID FORCEINLINE DS5_SUBMIT_REPORT_INIT(
     DS5_REPORT_INIT(&Report->Report);
 }
 
-#include <pshpack1.h>
+#pragma endregion
 
 #pragma region DS5 Await Output
 
