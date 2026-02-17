@@ -519,6 +519,25 @@ extern "C" {
         PVIGEM_TARGET target, 
         DS4_REPORT_EX report
     );
+    
+    /**
+     * Sends a full size state report to the provided target device. It's recommended to use this
+     * function over vigem_target_ds4_update.
+     *
+     * @author	awalol
+     * @date	16.02.2026
+     *
+     * @param 	vigem 	The driver connection object.
+     * @param 	target	The target device object.
+     * @param 	report	The report buffer.
+     *
+     * @returns	A VIGEM_ERROR.
+     */
+    VIGEM_API VIGEM_ERROR vigem_target_ds5_update(
+        PVIGEM_CLIENT vigem, 
+        PVIGEM_TARGET target, 
+        DS5_REPORT report
+    );
 
     /**
      * Returns the internal index (serial number) the bus driver assigned to the provided
