@@ -241,7 +241,7 @@ extern "C" {
      *
      * @returns	A PVIGEM_TARGET representing a DualSense 5 Controller device.
      */
-    VIGEM_API PVIGEM_TARGET vigem_target_DS5_alloc(void);
+    VIGEM_API PVIGEM_TARGET vigem_target_ds5_alloc(void);
 
     /**
      * Frees up memory used by the target device object. This does not automatically remove
@@ -460,7 +460,7 @@ extern "C" {
 
     /**
      * DEPRECATED. Sends a state report to the provided target device. It's recommended to use
-     * vigem_target_DS5_update_ex instead to utilize all DS5 features like touch, gyro etc.
+     * vigem_target_ds5_update_ex instead to utilize all DS5 features like touch, gyro etc.
      *
      * @author	Benjamin "Nefarius" Höglinger
      * @date	28.08.2017
@@ -471,7 +471,7 @@ extern "C" {
      *
      * @returns	A VIGEM_ERROR.
      */
-    VIGEM_API VIGEM_ERROR vigem_target_DS5_update(
+    VIGEM_API VIGEM_ERROR vigem_target_ds5_update(
         PVIGEM_CLIENT vigem, 
         PVIGEM_TARGET target, 
         DS5_REPORT report
@@ -591,7 +591,7 @@ extern "C" {
      *
      * @returns	A VIGEM_ERROR.
      */
-    VIGEM_API VIGEM_ERROR vigem_target_DS5_await_output_report_timeout(
+    VIGEM_API VIGEM_ERROR vigem_target_ds5_await_output_report_timeout(
         PVIGEM_CLIENT vigem, 
         PVIGEM_TARGET target,
         DWORD milliseconds,

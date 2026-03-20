@@ -451,7 +451,7 @@ PVIGEM_TARGET vigem_target_x360_alloc(void)
 	return target;
 }
 
-PVIGEM_TARGET vigem_target_DS5_alloc(void)
+PVIGEM_TARGET vigem_target_ds5_alloc(void)
 {
 	const auto target = VIGEM_TARGET_ALLOC_INIT(DualSense5Wired);
 
@@ -982,7 +982,7 @@ VIGEM_ERROR vigem_target_x360_update(
 	return VIGEM_ERROR_NONE;
 }
 
-VIGEM_ERROR vigem_target_DS5_update(
+VIGEM_ERROR vigem_target_ds5_update(
 	PVIGEM_CLIENT vigem,
 	PVIGEM_TARGET target,
 	DS5_REPORT report
@@ -1034,8 +1034,8 @@ VIGEM_ERROR vigem_target_DS5_update(
 
 
 
-// vigem_target_DS5_update_ex removed: DS5_REPORT is now the full 63-byte report,
-// use vigem_target_DS5_update instead.
+// vigem_target_ds5_update_ex removed: DS5_REPORT is now the full 63-byte report,
+// use vigem_target_ds5_update instead.
 
 ULONG vigem_target_get_index(PVIGEM_TARGET target)
 {
@@ -1119,10 +1119,10 @@ VIGEM_ERROR vigem_target_DS5_await_output_report(
 	PDS5_OUTPUT_BUFFER buffer
 )
 {
-	return vigem_target_DS5_await_output_report_timeout(vigem, target, INFINITE, buffer);
+	return vigem_target_ds5_await_output_report_timeout(vigem, target, INFINITE, buffer);
 }
 
-VIGEM_ERROR vigem_target_DS5_await_output_report_timeout(
+VIGEM_ERROR vigem_target_ds5_await_output_report_timeout(
 	PVIGEM_CLIENT vigem,
 	PVIGEM_TARGET target,
 	DWORD milliseconds,
